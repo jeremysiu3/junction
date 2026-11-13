@@ -1,0 +1,28 @@
+{
+  "name": "junctionmcp",
+  "version": "0.1.0",
+  "description": "Local worker for Junction: runs your Claude Code headless on tasks you approve.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "junctionmcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeremysiu3/junction",
+    "directory": "packages/worker"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "npm run build"
+  }
+}

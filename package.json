@@ -1,0 +1,17 @@
+{
+  "name": "junction",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "test": "vitest run",
+    "db:reset": "supabase db reset",
+    "seed": "tsx --env-file=apps/web/.env.local scripts/seed.ts",
+    "worker": "npm run start -w junctionmcp"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

@@ -1,0 +1,16 @@
+node_modules
+.next
+.env*.local
+supabase/.temp
+supabase/.branches
+.superpowers/
+supabase/.env
+dist/
+.DS_Store
+
+# Private notes live in .private/ (a separate private repo); these never belong in the public repo
+.private/
+SPEC.md
+CLAUDE.md
+docs/superpowers/
+docs/followups.md
