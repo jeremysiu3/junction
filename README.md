@@ -148,6 +148,8 @@ npm test
 
 **Database role.** The migrations create `junction_app`, a `NOLOGIN` role that can read and write the `public` tables and reaches `auth` only through the `junction_auth` functions. Production connects as it: give it `LOGIN` and a password with `alter role junction_app with login password '...'`, outside any migration. Set `JUNCTION_TEST_DB_URL` to a `junction_app` URL to run core's tests as it.
 
+**Migrations on hosted Supabase.** `supabase db push` runs as a CLI login role that can't see the `auth` schema, so a migration that touches `auth` (such as the `junction_auth` functions) fails there. Run that one in the dashboard's SQL Editor, which runs as `postgres`, then record it with `supabase migration repair --status applied <version>`.
+
 Layout:
 
 ```
