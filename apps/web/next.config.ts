@@ -15,6 +15,8 @@ const csp = [
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@junction/core'],
+  // Vercel installs only this workspace's packages, so the build type-checks app code without the tests (vitest is a root dev dependency).
+  typescript: { tsconfigPath: 'tsconfig.build.json' },
   devIndicators: { position: 'bottom-right' },
   // The dashboard runs at 127.0.0.1 (Supabase site_url); without this, next dev blocks its own scripts there.
   allowedDevOrigins: ['127.0.0.1'],
