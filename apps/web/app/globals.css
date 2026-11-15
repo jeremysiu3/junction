@@ -273,6 +273,7 @@ dl.fields dd { margin: 0; }
 
 /* forms and buttons */
 button, .button {
+  display: inline-block; text-decoration: none;
   font: inherit; font-size: var(--text-sm); font-weight: 600;
   padding: 8px 15px;
   border-radius: var(--radius-sm);
@@ -280,9 +281,9 @@ button, .button {
   background: var(--raised); color: var(--ink);
   cursor: pointer;
 }
-button:hover { background: var(--hover); }
-button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-button.primary:hover { filter: brightness(1.08); }
+button:hover, .button:hover { background: var(--hover); text-decoration: none; }
+button.primary, .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.primary:hover, .button.primary:hover { filter: brightness(1.08); }
 button.danger { color: var(--red); border-color: var(--red-soft); }
 button.danger:hover { background: var(--red-soft); }
 input, select, textarea {
@@ -413,3 +414,14 @@ button.text:hover { color: var(--ink); }
 .sec { margin-bottom: var(--space-5); }
 .kc .acts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
 .kc .acts details { margin-top: 0; }
+
+/* signal 404: the "don't walk" pair. Housing stays black in both themes. */
+.sig { display: grid; gap: 8px; padding: 10px; width: max-content; margin: 0 auto; background: #050506; border-radius: 14px; box-shadow: 0 0 0 1px #2a2c31, 0 18px 40px -18px #000; }
+.sig .lp { width: 120px; height: 120px; border-radius: 9px; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #121315, #09090a 70%); box-shadow: inset 0 10px 12px -8px #000; }
+.sig .lp.on { background: radial-gradient(circle, rgba(243, 154, 43, 0.18), transparent 68%), radial-gradient(circle at 50% 45%, #121315, #09090a 70%); }
+.sig .lp.off img { width: 58px; opacity: 0.13; filter: saturate(0.2); }
+.nf { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px var(--gutter, 16px); }
+main.nf { min-height: 100vh; }
+.nf h1 { font: 800 44px/1 var(--font-body); letter-spacing: -0.035em; line-height: 1; margin: 34px 0 10px; }
+.nf p { color: var(--muted); margin: 0; }
+.nf .acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
