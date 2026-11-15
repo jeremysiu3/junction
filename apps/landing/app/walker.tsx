@@ -2,15 +2,15 @@
 // rotated at the joints like a paper cut-out puppet. Masks hide the far limbs where the torso and near limbs cover them.
 // Fixed wk- IDs: one instance per page.
 const SRC = '/brand/figure.png';
-const TORSO = 'M150 145 L200 142 L225 160 L232 180 L218 208 L206 262 L196 312 L185 332 L165 346 L118 344 L124 300 L136 242 L148 190 L146 160 Z';
+const TORSO = 'M150 145 L200 142 L225 160 L232 180 L218 208 L206 262 L196 312 L191 320 L160 368 L150 368 L128 362 L110 356 L100 350 L103 330 L124 300 L136 242 L148 190 L146 160 Z';
 const LEG_L = 'M112 350 L160 352 L148 380 L84 462 L48 478 L30 468 L46 442 L102 374 Z';
-const ARM_L = 'M144 190 L124 210 L106 232 L92 256 L84 278 L52 278 L46 264 L82 222 L110 176 L138 166 Z';
+const ARM_L = 'M146 186 L124 210 L106 232 L92 256 L84 278 L52 278 L46 264 L82 222 L88 186 L104 191 L120 188 L140 182 Z';
 const CLIPS = {
   head: '135,8 270,8 270,134 135,134',
-  armL: '70,150 152,138 152,182 122,250 96,294 20,300 20,240',
+  armL: '20,240 50,196 84,176 104,188 120,185 140,179 147,182 145,196 122,250 96,294 20,300',
   armR: '214,170 350,205 350,275 228,270 216,214',
-  torso: '152,128 238,128 243,176 220,204 208,322 186,346 102,346 112,292 129,238 152,182',
-  legL: '104,330 170,330 158,368 92,500 0,500 0,440',
+  torso: '152,128 238,128 243,176 220,204 208,322 194,321 162,370 150,371 128,365 109,359 96,353 100,330 112,292 129,238 145,196 147,182 140,179 120,185 104,188 84,176 100,156',
+  legL: '108,322 170,330 158,368 92,500 0,500 0,440',
   legR: '152,358 192,316 280,380 280,500 196,500',
 };
 type Part = keyof typeof CLIPS;
@@ -35,7 +35,7 @@ export function Walker({ className }: { className?: string }) {
       </defs>
       <g className="body">
         <defs>
-          <Mask id="wk-m-armR">
+          <Mask id="wk-m-behind">
             <path d={TORSO} />
           </Mask>
           <Mask id="wk-m-legR">
@@ -43,14 +43,13 @@ export function Walker({ className }: { className?: string }) {
             <g className="legL"><path d={LEG_L} /></g>
           </Mask>
           <Mask id="wk-m-torso">
-            <g className="legL"><path d={LEG_L} /></g>
             <g className="armL"><path d={ARM_L} /></g>
           </Mask>
         </defs>
-        <g mask="url(#wk-m-armR)"><g className="armR"><Img part="armR" /></g></g>
+        <g mask="url(#wk-m-behind)"><g className="armR"><Img part="armR" /></g></g>
         <g mask="url(#wk-m-legR)"><g className="legR"><Img part="legR" /></g></g>
+        <g mask="url(#wk-m-behind)"><g className="legL"><Img part="legL" /></g></g>
         <g mask="url(#wk-m-torso)"><g className="torso"><Img part="torso" /></g></g>
-        <g className="legL"><Img part="legL" /></g>
         <g className="armL"><Img part="armL" /></g>
         <g className="head"><Img part="head" /></g>
       </g>
