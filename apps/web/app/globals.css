@@ -425,3 +425,18 @@ main.nf { min-height: 100vh; }
 .nf h1 { font: 800 44px/1 var(--font-body); letter-spacing: -0.035em; line-height: 1; margin: 34px 0 10px; }
 .nf p { color: var(--muted); margin: 0; }
 .nf .acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
+
+/* loading skeletons (skeleton.tsx). The wrapper fades in after 300ms, so a fast navigation never shows grey blocks. */
+.sk-page { animation: sk-in 0.2s ease-out 0.3s both; }
+.sk { display: block; background: var(--hover); border-radius: 4px; animation: sk-pulse 1.6s ease-in-out infinite; }
+.sk-lines { display: flex; flex-direction: column; gap: var(--space-2); }
+/* keep the slots the real headings take (one line box each), so the content below starts where it does on the loaded page */
+.sk-page .page-head { min-height: 30px; align-items: center; }
+.sk-page .page-head p, .sk-page .lbl, .sk-page .colh { min-height: calc(1em * var(--leading)); }
+@keyframes sk-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sk-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+/* no fade and no pulse; the 300ms delay still holds the blocks back for fast loads */
+@media (prefers-reduced-motion: reduce) {
+  .sk-page { animation-duration: 0s; }
+  .sk { animation: none; opacity: 0.8; }
+}
