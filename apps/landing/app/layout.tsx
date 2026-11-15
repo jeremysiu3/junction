@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Overpass } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
-import { GitHubMark, LOGIN, Logo, REPO } from './ui';
+import { Lockup } from './lockup';
+import { GitHubMark, LOGIN, REPO } from './ui';
 import './globals.css';
 
 // Overpass descends from Highway Gothic, the lettering on US road signs.
@@ -23,9 +24,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={overpass.variable}>
       <body>
         <header className="topbar">
-          <a className="brand" href="/">
-            <Logo size={34} />
-            Junction
+          <a className="lk-link" href="/" aria-label="Junction home">
+            <Lockup />
           </a>
           <nav className="topnav">
             <a className="gh" href={REPO} aria-label="GitHub">
@@ -37,9 +37,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         {children}
         <footer className="footer">
-          <a className="brand brand-sm" href="/">
-            <Logo size={24} />
-            Junction
+          <a className="lk-link" href="/" aria-label="Junction home">
+            <Lockup />
           </a>
           <nav>
             <a href="/privacy">Privacy</a>

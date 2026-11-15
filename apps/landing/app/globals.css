@@ -79,8 +79,17 @@ img, svg { display: block; }
   margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter);
 }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 20px; }
-.brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; text-decoration: none; }
-.brand-sm { font-size: 17px; gap: 8px; }
+/* logo lockup: sized by font-size; --cap is Overpass's cap height (1400/2000 em), so web and landing match without loading Overpass */
+.lk { --cap: 0.7em; display: inline-flex; align-items: center; gap: calc(var(--cap) * 0.5); line-height: 1; }
+.lk .wm { height: var(--cap); width: auto; flex: none; overflow: visible; }
+.lk .tile { width: calc(var(--cap) * 1.9); height: calc(var(--cap) * 1.9); flex: none; border-radius: 22%; background: #050506; display: grid; place-items: center; }
+.lk .tile img { height: calc(var(--cap) * 1.37); width: auto; }
+.lk-stack { flex-direction: column; gap: calc(var(--cap) * 0.45); }
+.lk-stack .tile { width: calc(var(--cap) * 2.6); height: calc(var(--cap) * 2.6); }
+.lk-stack .tile img { height: calc(var(--cap) * 1.875); transform: translateX(calc(var(--cap) * 0.04)); }
+.lk-link { text-decoration: none; }
+.topbar .lk { font-size: 22px; }
+.footer .lk { font-size: 16px; }
 .topnav { display: flex; align-items: center; gap: 20px; }
 .gh { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 600; text-decoration: none; }
 .gh:hover { color: var(--ink); }

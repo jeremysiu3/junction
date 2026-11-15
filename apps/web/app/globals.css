@@ -117,6 +117,15 @@ code, .mono { font-family: var(--font-mono); font-size: var(--text-sm); color: v
 .sidebar a { color: inherit; }
 .sidebar .top { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-2); }
 .brand { font-weight: 700; font-size: var(--text-lg); letter-spacing: -0.02em; padding: 4px 8px 2px; }
+/* logo lockup: sized by font-size; --cap is Overpass's cap height (1400/2000 em), so web and landing match without loading Overpass */
+.lk { --cap: 0.7em; display: inline-flex; align-items: center; gap: calc(var(--cap) * 0.5); line-height: 1; }
+.lk .wm { height: var(--cap); width: auto; flex: none; overflow: visible; }
+.lk .tile { width: calc(var(--cap) * 1.9); height: calc(var(--cap) * 1.9); flex: none; border-radius: 22%; background: #050506; display: grid; place-items: center; }
+.lk .tile img { height: calc(var(--cap) * 1.37); width: auto; }
+.lk-stack { flex-direction: column; gap: calc(var(--cap) * 0.45); }
+.lk-stack .tile { width: calc(var(--cap) * 2.6); height: calc(var(--cap) * 2.6); }
+.lk-stack .tile img { height: calc(var(--cap) * 1.875); transform: translateX(calc(var(--cap) * 0.04)); }
+.sidebar .top .lk { font-size: 18px; margin-left: 8px; }
 .sidebar-toggle { padding: 5px; border: 0; background: none; color: var(--muted); display: flex; }
 .sidebar-toggle:hover { background: var(--hover); color: var(--ink); }
 .project-switch, .account { position: relative; font-size: var(--text-sm); }
@@ -212,11 +221,12 @@ span.avatar { display: flex; align-items: center; justify-content: center; backg
 
 /* collapsed sidebar: icons only (wide screens; the narrow layout stacks instead) */
 @media (min-width: 901px) {
-  .shell.mini .brand, .shell.mini .project-switch, .shell.mini .lbltxt, .shell.mini .account .name, .shell.mini .account .chev { display: none; }
+  .shell.mini .lk .wm, .shell.mini .project-switch, .shell.mini .lbltxt, .shell.mini .account .name, .shell.mini .account .chev { display: none; }
   .shell.mini .sidebar { overflow: visible; } /* the account menu opens to the right of the rail */
   .shell.mini .account summary { justify-content: center; }
   .shell.mini .account .menu { left: calc(100% + 18px); right: auto; bottom: 0; min-width: 14rem; }
-  .shell.mini .sidebar .top { justify-content: center; }
+  .shell.mini .sidebar .top { flex-direction: column; justify-content: center; gap: var(--space-2); } /* tile above the expand toggle */
+  .shell.mini .sidebar .top .lk { margin-left: 0; }
   .shell.mini .nav a { justify-content: center; position: relative; }
   .shell.mini .nav .count { position: absolute; top: 2px; left: calc(50% + 2px); margin: 0; box-shadow: 0 0 0 2px var(--panel); }
 }

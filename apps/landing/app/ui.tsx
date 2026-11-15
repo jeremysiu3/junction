@@ -8,8 +8,3 @@ export function GitHubMark({ size = 18 }: { size?: number }) {
     </svg>
   );
 }
-
-// The app icon: the walking figure lit on a signal-black tile. The bare linework is too faint at this size.
-export function Logo({ size }: { size: number }) {
-  return <img src="/icon.png" alt="" width={size} height={size} />;
-}
