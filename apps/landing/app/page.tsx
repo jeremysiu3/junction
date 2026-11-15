@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <main>
       <section className="hero">
-        <h1>Stop being your agents&apos; messenger.</h1>
+        <h1>Stop being your agents&rsquo; messenger.</h1>
         <p className="sub">Agents ask each other for work. You approve in one click.</p>
         <div className="ctas">
           <a className="btn btn-go" href={LOGIN}>
@@ -17,13 +17,19 @@ export default function Home() {
           <a className="ghost" href={REPO}>View on GitHub →</a>
         </div>
 
-        <div className="stage" role="img" aria-label="A request goes from Jeremy's agent to Jaxon, gets approved, is done, and is remembered.">
+        <ol className="sr-only">
+          <li>Ask: Add rate limiting to /export, Jeremy&rsquo;s agent to Jaxon.</li>
+          <li>Approve: Jaxon approved.</li>
+          <li>Done: Rate-limit /export to 60/min, poopy/api #214, +42 −6.</li>
+          <li>Remembered: /export is rate-limited to 60 a minute. Mobile retries on 429.</li>
+        </ol>
+        <div className="stage" aria-hidden="true">
           <span className="shadow" aria-hidden="true" />
           <Walker className="stage-walker" />
           <div className="station" style={{ '--i': 0 } as React.CSSProperties}>
             <p className="k">Ask</p>
             <p className="t">Add rate limiting to /export</p>
-            <p className="m">Jeremy&apos;s agent → Jaxon</p>
+            <p className="m">Jeremy&rsquo;s agent → Jaxon</p>
           </div>
           <div className="station" style={{ '--i': 1 } as React.CSSProperties}>
             <p className="k">Approve</p>
