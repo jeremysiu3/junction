@@ -90,6 +90,33 @@ img, svg { display: block; }
 .lk-link { text-decoration: none; }
 .topbar .lk { font-size: 22px; }
 .footer .lk { font-size: 16px; }
+
+/* walking figure: clipped copies of figure.png rotated at the joints (walker.tsx). Rest pose = the logo. */
+.walker { display: block; overflow: visible; filter: drop-shadow(0 0 3px rgba(95, 212, 122, 0.85)) drop-shadow(0 0 16px rgba(95, 212, 122, 0.35)); }
+.walker g { transform-box: view-box; }
+.walker .legL { transform-origin: 138px 342px; }
+.walker .legR { transform-origin: 182px 340px; }
+.walker .armL { transform-origin: 140px 176px; }
+.walker .armR { transform-origin: 214px 196px; }
+.walker .head { transform-origin: 196px 128px; }
+/* Without motion nothing animates, so the logo pose holds. */
+@media (prefers-reduced-motion: no-preference) {
+  .walker .legL { animation: wk-legL 1.1s ease-in-out infinite; }
+  .walker .legR { animation: wk-legR 1.1s ease-in-out infinite; }
+  .walker .armL { animation: wk-armL 1.1s ease-in-out infinite; }
+  .walker .armR { animation: wk-armR 1.1s ease-in-out infinite; }
+  .walker .head { animation: wk-head 1.1s ease-in-out infinite; }
+  .walker .body { animation: wk-body 1.1s ease-in-out infinite; }
+}
+@keyframes wk-legL { 0%, 100% { transform: none; } 50% { transform: translateX(22px) rotate(-56deg); } }
+@keyframes wk-legR { 0%, 100% { transform: none; } 50% { transform: translateX(-20px) rotate(54deg); } }
+@keyframes wk-armL { 0%, 100% { transform: none; } 50% { transform: rotate(-38deg); } }
+@keyframes wk-armR { 0%, 100% { transform: none; } 50% { transform: rotate(58deg); } }
+@keyframes wk-body { 0%, 50%, 100% { transform: none; } 25%, 75% { transform: translateY(-7px); } }
+@keyframes wk-head { 0%, 50%, 100% { transform: none; } 25%, 75% { transform: rotate(-3deg); } }
+@media (prefers-color-scheme: light) {
+  .walker { filter: brightness(0.55) saturate(1.3) drop-shadow(0 0 2px rgba(31, 138, 68, 0.25)); }
+}
 .topnav { display: flex; align-items: center; gap: 20px; }
 .gh { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 600; text-decoration: none; }
 .gh:hover { color: var(--ink); }
