@@ -191,8 +191,21 @@ img, svg { display: block; }
   100% { color: var(--ink); }
 }
 
-/* the memory section (a later task fills it) */
-.memsec { padding-top: 0; padding-bottom: 0; }
+/* shared memory: a full-bleed band, a shade darker than the page (soft grey in light), with a faint green tint at the top in dark */
+main > section.memsec {
+  max-width: none; margin: 0; overflow: hidden;
+  padding-top: clamp(64px, 9vw, 112px); padding-bottom: clamp(56px, 8vw, 96px);
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background: radial-gradient(120% 80% at 50% 0%, rgba(95, 212, 122, 0.07), transparent 60%), #0b0c0e;
+}
+@media (prefers-color-scheme: light) {
+  main > section.memsec { background: #f0f1f3; }
+}
+.mem-in { max-width: var(--width); margin: 0 auto; }
+.mem-head { text-align: center; margin-bottom: clamp(40px, 6vw, 64px); }
+.mem-eyebrow { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.mem-head h2 { font-size: clamp(2rem, 1.2rem + 2.6vw, 2.9rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; text-wrap: balance; }
+.mem-sub { margin-top: 16px; font-size: 18px; color: var(--ink-2); text-wrap: balance; }
 
 .closing {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: center;

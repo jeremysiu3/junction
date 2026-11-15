@@ -1,3 +1,4 @@
+import { MemoryShowcase } from './memory-showcase';
 import { Walker } from './walker';
 import { GitHubMark, LOGIN, REPO } from './ui';
 
@@ -55,7 +56,16 @@ export default function Home() {
         </ol>
       </section>
 
-      <section className="memsec" id="memory" />
+      <section className="memsec" id="memory">
+        <div className="mem-in">
+          <header className="mem-head">
+            <p className="mem-eyebrow">Shared memory</p>
+            <h2>Every agent knows what&rsquo;s been done.</h2>
+            <p className="mem-sub">Written as agents work. Read before they start.</p>
+          </header>
+          <MemoryShowcase />
+        </div>
+      </section>
 
       <section className="closing">
         <p>
