@@ -13,7 +13,7 @@ export default function Loading() {
               <span className="dot sk" aria-hidden="true" />
               <div className="body">
                 <div className="t"><Sk w={i === 1 ? '58%' : '72%'} h={14} /></div>
-                <div className="m"><Sk w="36%" h={12} /></div>
+                <div className="m" style={{ marginTop: 4 }}><Sk w="36%" h={12} /></div>
               </div>
             </div>
           ))}

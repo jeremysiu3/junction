@@ -12,6 +12,7 @@ export default function Loading() {
             <div className="kc" key={i}>
               <div className="t"><Sk w={['78%', '64%', '70%'][i]} h={14} /></div>
               <div className="m"><Sk w={['38%', '30%', '34%'][i]} h={11} /></div>
+              <div className="m" style={{ marginTop: 8 }}><Sk w="60px" h={12} /></div>
             </div>
           ))}
         </section>

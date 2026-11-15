@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <main className="nf">
       <div className="sig">
-        <div className="lp on"><LedHand size={56} /></div>
+        <div className="lp on"><LedHand size={72} /></div>
         <div className="lp off"><img src="/brand/figure.png" alt="" /></div>
       </div>
       <h1>Wrong turn.</h1>

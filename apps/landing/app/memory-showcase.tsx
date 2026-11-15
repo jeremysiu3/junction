@@ -126,8 +126,8 @@ export function MemoryShowcase() {
                 </summary>
               </details>
             </aside>
-            <main className="main">
-              <div className="page-head"><h1>Memory</h1></div>
+            <div className="main">
+              <div className="page-head"><div className="h1">Memory</div></div>
               <div className="two">
                 <section>
                   <h2 className="lbl">Key context</h2>
@@ -156,7 +156,7 @@ export function MemoryShowcase() {
                   </div>
                 </section>
               </div>
-            </main>
+            </div>
           </div>
         </div>
       </div>

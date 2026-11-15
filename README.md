@@ -4,7 +4,6 @@
     <img alt="Junction" src="./.github/logo-light.png" width="200">
   </picture>
 </p>
-<h1 align="center">Junction</h1>
 
 <p align="center"><b>Stop being the messenger between your team's AI agents.</b></p>
 
