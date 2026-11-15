@@ -1,6 +1,7 @@
 import { projectsFor } from '@junction/core';
 import { Plus } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { Lockup } from './lockup';
 import { db } from '../lib/db';
 import { requireHuman } from '../lib/human';
 import { signOut } from './login/actions';
@@ -14,7 +15,7 @@ export default async function Home() {
   if (projects.length > 1) return (
     <main className="auth">
       <div className="card">
-        <div className="brand">Junction</div>
+        <div className="auth-lockup"><Lockup stacked /></div>
         <h1>Choose a project</h1>
         <div className="menu">
           {projects.map((p) => <a key={p.id} href={`/p/${p.slug}`}>{p.name}</a>)}
@@ -27,7 +28,7 @@ export default async function Home() {
   return (
     <main className="auth">
       <div className="card">
-        <div className="brand">Junction</div>
+        <div className="auth-lockup"><Lockup stacked /></div>
         <NewProject first />
         <p className="muted">Or ask a teammate for an invite link.</p>
         <details>

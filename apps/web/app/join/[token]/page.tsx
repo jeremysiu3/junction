@@ -1,4 +1,5 @@
 import { inviteByToken } from '@junction/core';
+import { Lockup } from '../../lockup';
 import { db } from '../../../lib/db';
 import { currentHuman, devLoginEnabled } from '../../../lib/human';
 import { SignInForms } from '../../login/sign-in-forms';
@@ -13,7 +14,7 @@ export default async function Join({ params }: { params: Promise<{ token: string
   return (
     <main className="auth">
       <div className="card">
-        <div className="brand">Junction</div>
+        <div className="auth-lockup"><Lockup stacked /></div>
         {!invite ? (
           <h1>This invite link isn&apos;t valid</h1>
         ) : invite.status !== 'open' ? (

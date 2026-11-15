@@ -1,3 +1,4 @@
+import { Lockup } from '../lockup';
 import { requireHuman } from '../../lib/human';
 import { NewProject } from './new-project';
 
@@ -6,7 +7,7 @@ export default async function New() {
   return (
     <main className="auth">
       <div className="card">
-        <div className="brand">Junction</div>
+        <div className="auth-lockup"><Lockup stacked /></div>
         <NewProject />
         <p className="muted"><a href="/">Cancel</a></p>
       </div>

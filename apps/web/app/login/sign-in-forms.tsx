@@ -1,3 +1,4 @@
+import { GitHubMark } from '../github-mark';
 import { signIn, signInWithGitHub } from './actions';
 
 export function SignInForms({ next, dev }: { next: string; dev: boolean }) {
@@ -5,11 +6,11 @@ export function SignInForms({ next, dev }: { next: string; dev: boolean }) {
     <>
       <form action={signInWithGitHub}>
         <input type="hidden" name="next" value={next} />
-        <button className="primary">Continue with GitHub</button>
+        <button className="gh"><GitHubMark />Continue with GitHub</button>
       </form>
-      <p className="muted">
-        By signing in you agree to the <a href="https://junctionmcp.com/terms">Terms</a> and{' '}
-        <a href="https://junctionmcp.com/privacy">Privacy Policy</a>
+      <p className="muted terms">
+        By continuing you agree to the <a href="https://junctionmcp.com/terms">Terms</a> and{' '}
+        <a href="https://junctionmcp.com/privacy">Privacy Policy</a>.
       </p>
       {dev && (
         <form action={signIn}>
