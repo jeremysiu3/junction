@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./.github/logo-dark.png">
-    <img alt="Junction" src="./.github/logo-light.png" width="120">
+    <img alt="Junction" src="./.github/logo-light.png" width="200">
   </picture>
 </p>
 <h1 align="center">Junction</h1>
