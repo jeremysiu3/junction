@@ -1,6 +1,6 @@
 'use server';
 import {
-  answerQuestion, approveTask, cancelInvite, createInvite, declineTask, deferTask, deleteAccount, getTaskDetail, hasLink, JunctionError, listConnections, listMembers, markAbandoned, markDashboardSeen,
+  answerQuestion, approveTask, cancelInvite, createInvite, declineTask, deferTask, deleteAccount, deleteProject, getTaskDetail, hasLink, JunctionError, listConnections, listMembers, markAbandoned, markDashboardSeen,
   projectForMember, projectsFor, removeMember, renameProject, retryTask, revokeWorkerCredential, saveArea, setRole, setStaleDays, unapproveTask, userProfile, type Actor,
 } from '@junction/core';
 import { revalidatePath } from 'next/cache';
@@ -128,6 +128,19 @@ export async function deleteAccountAction(_prev: { error?: string }, formData: F
   }
   await (await supabaseServer()).auth.signOut({ scope: 'local' }).catch(() => {});
   redirect('/login?deleted=1');
+}
+
+export async function deleteProjectAction(_prev: { error?: string }, formData: FormData): Promise<{ error?: string }> {
+  const actor = await requireHuman();
+  const project = await projectForMember(db, actor.userId, String(formData.get('slug')));
+  if (String(formData.get('name') ?? '').trim() !== project.name) return { error: 'Type the project name to confirm' };
+  try {
+    await deleteProject(db, actor, project.id);
+  } catch (e) {
+    if (e instanceof JunctionError) return { error: e.message };
+    throw e;
+  }
+  redirect('/');
 }
 
 // The invite link carries the token, so it goes back only in the action result (never a URL or redirect) and only to this admin.

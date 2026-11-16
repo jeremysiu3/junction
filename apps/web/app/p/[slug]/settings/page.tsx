@@ -5,6 +5,7 @@ import { projectFromSlug } from '../../../../lib/project';
 import {
   cancelInviteAction, removeMemberAction, renameProjectAction, saveAreaAction, setRoleAction, setStaleDaysAction,
 } from '../actions';
+import { DeleteProjectForm } from './delete-project-form';
 import { InviteForm } from './invite-form';
 
 type Member = { id: string; name: string };
@@ -160,6 +161,15 @@ export default async function Settings({ params, searchParams }: { params: Promi
           </div>
         </section>
       </div>
+      {admin && (
+        <section className="sec danger-zone" style={{ marginTop: 'var(--space-5)' }}>
+          <h2 className="lbl">Danger zone</h2>
+          <div className="kc">
+            <p>Deleting {project.name} removes it for every member, with all its requests, context, work and responsibilities. This can&apos;t be undone.</p>
+            <DeleteProjectForm slug={slug} name={project.name} />
+          </div>
+        </section>
+      )}
     </>
   );
 }

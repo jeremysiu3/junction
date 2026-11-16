@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
-  JunctionError, acceptInvite, approveTask, assertMember, cancelInvite, createDb, createInvite, createProject, hasLink, inviteByToken, listConnections, listInvites, listMembers,
+  JunctionError, acceptInvite, approveTask, assertMember, cancelInvite, createDb, createInvite, createProject, deleteProject, hasLink, inviteByToken, listConnections, listInvites, listMembers,
   removeMember, roleOf, renameProject, sendTask, setRole, setupState, userByWorkerToken,
 } from '../src';
 import { adminDb, agent, human, makeProject } from './fixtures';
@@ -140,6 +140,26 @@ describe('setRole', () => {
     await setRole(db, j, p.project.id, p.jeremy.id, 'member');
     const roles = await listMembers(db, human(p.scott), p.project.id);
     expect(roles.map(m => [m.name, m.role])).toEqual([['Jaxon', 'admin'], ['Jeremy', 'member'], ['Scott', 'member']]);
+  });
+});
+
+describe('deleteProject', () => {
+  it('admin deletes the project and everything in it; members, agents and outsiders cannot', async () => {
+    const p = await makeProject(db);
+    const t = await sendTask(db, agent(p.jaxon), { projectId: p.project.id, assignee: 'Jeremy', title: 'Doomed', description: 'd', blockingReason: 'b', changes: ['c'], repo: 'site' });
+    await createInvite(db, human(p.jeremy), p.project.id, `x-${p.project.slug}@example.com`);
+    const other = await makeProject(db);
+    expect(await code(deleteProject(db, human(p.jaxon), p.project.id))).toBe('forbidden');
+    expect(await code(deleteProject(db, agent(p.jeremy), p.project.id))).toBe('forbidden');
+    expect(await code(deleteProject(db, human(other.jeremy), p.project.id))).toBe('forbidden');
+
+    await deleteProject(db, human(p.jeremy), p.project.id);
+
+    expect(await db`select 1 from projects where id = ${p.project.id}`).toHaveLength(0);
+    expect(await db`select 1 from tasks where id = ${t.id}`).toHaveLength(0);
+    expect(await db`select 1 from memberships where project_id = ${p.project.id}`).toHaveLength(0);
+    expect(await db`select 1 from invites where project_id = ${p.project.id}`).toHaveLength(0);
+    expect(await db`select 1 from projects where id = ${other.project.id}`).toHaveLength(1);
   });
 });
 

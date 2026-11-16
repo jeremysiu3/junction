@@ -8,7 +8,7 @@ vi.mock('../lib/human', () => ({ requireHuman: async () => ({ userId: me.userId,
 vi.mock('next/cache', () => ({ revalidatePath: () => {} }));
 vi.mock('next/navigation', () => ({ redirect: (to: string) => { throw new Error(`redirect ${to}`); } }));
 
-import { decline, defer } from '../app/p/[slug]/actions';
+import { decline, defer, deleteProjectAction } from '../app/p/[slug]/actions';
 
 const db = createDb();
 afterAll(() => db.end());
@@ -34,5 +34,25 @@ describe('defer and decline', () => {
     expect(r).toMatchObject({ status: 'pending_approval', deferredAt: null });
     await decline(form({ slug: p.project.slug, id: t.id }));
     expect((await db`select status from tasks where id = ${t.id}`)[0].status).toBe('declined');
+  });
+});
+
+describe('deleteProjectAction', () => {
+  it('needs the exact project name, then deletes and goes home', async () => {
+    const p = await makeProject(db);
+    me.userId = p.jeremy.id;
+    const [{ name }] = await db`select name from projects where id = ${p.project.id}`;
+    for (const typed of ['', 'wrong', ` ${name.toUpperCase()}x`])
+      expect(await deleteProjectAction({}, form({ slug: p.project.slug, name: typed }))).toEqual({ error: 'Type the project name to confirm' });
+    expect(await db`select 1 from projects where id = ${p.project.id}`).toHaveLength(1);
+    await expect(deleteProjectAction({}, form({ slug: p.project.slug, name: ` ${name} ` }))).rejects.toThrow('redirect /');
+    expect(await db`select 1 from projects where id = ${p.project.id}`).toHaveLength(0);
+  });
+
+  it("returns core's error for a member who isn't an admin", async () => {
+    const p = await makeProject(db);
+    me.userId = p.jaxon.id;
+    const [{ name }] = await db`select name from projects where id = ${p.project.id}`;
+    expect(await deleteProjectAction({}, form({ slug: p.project.slug, name }))).toEqual({ error: 'only a project admin can do this' });
   });
 });

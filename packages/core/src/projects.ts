@@ -167,6 +167,15 @@ export async function removeMember(db: Db, actor: Actor, projectId: string, user
   });
 }
 
+// Every project table cascades from projects, so this removes its tasks, context, work, areas, invites and memberships.
+export async function deleteProject(db: Db, actor: Actor, projectId: string): Promise<void> {
+  humanOnly(actor, 'deleting a project');
+  await db.begin(async tx => {
+    await assertAdminLocked(tx as unknown as Db, actor.userId, projectId);
+    await tx`delete from projects where id = ${projectId}`;
+  });
+}
+
 // Leaves every project, revokes workers, anonymizes the users row (history keeps resolving) and deletes the login,
 // which cascades sessions and OAuth consents so connected agents stop working.
 export async function deleteAccount(db: Db, actor: Actor): Promise<void> {

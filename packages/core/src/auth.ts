@@ -83,9 +83,9 @@ export async function userProfile(db: Db, userId: string): Promise<{ name: strin
   return { name: u.name, email: u.email, avatarUrl };
 }
 
-export async function projectForMember(db: Db, userId: string, slug: string): Promise<{ id: string; slug: string }> {
-  const [p] = await db`select id, slug from projects where slug = ${slug}`;
+export async function projectForMember(db: Db, userId: string, slug: string): Promise<{ id: string; slug: string; name: string }> {
+  const [p] = await db`select id, slug, name from projects where slug = ${slug}`;
   if (!p) throw new JunctionError('not_found', 'project not found');
   await assertMember(db, userId, p.id);
-  return { id: p.id, slug: p.slug };
+  return { id: p.id, slug: p.slug, name: p.name };
 }

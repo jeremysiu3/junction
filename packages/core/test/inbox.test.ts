@@ -214,7 +214,7 @@ describe('auth lookups', () => {
   it('projectForMember', async () => {
     const p = await makeProject(db);
     const other = await makeProject(db);
-    expect(await projectForMember(db, p.jaxon.id, p.project.slug)).toEqual(p.project);
+    expect(await projectForMember(db, p.jaxon.id, p.project.slug)).toEqual({ ...p.project, name: expect.any(String) });
     expect(await code(projectForMember(db, p.jaxon.id, 'no-such-slug'))).toBe('not_found');
     expect(await code(projectForMember(db, p.jaxon.id, other.project.slug))).toBe('forbidden');
   });
