@@ -1,5 +1,6 @@
 import type { Db } from './db';
-import { assertMember, lockUser } from './members';
+import { humanOnly } from './areas';
+import { assertMember, lockUser, roleOf } from './members';
 import { LIMITS, capList } from './rules';
 import { JunctionError, type Actor, type ContextEntry } from './types';
 
@@ -105,4 +106,39 @@ export async function findOwner(db: Db, actor: Actor, input: { projectId: string
     areas: areas as unknown as { name: string; ownerName: string | null; ownerEmail: string | null; description: string }[],
     members: members as unknown as { name: string; email: string }[],
   };
+}
+
+export type ListedEntry = ContextEntryWithAuthor & { replaced: boolean; canDelete: boolean };
+
+// Everything the viewer can see in the project (project entries and their own private ones), newest first, for the dashboard.
+export async function listContext(
+  db: Db, actor: Actor, projectId: string, opts: { limit: number; before?: Date },
+): Promise<ListedEntry[]> {
+  await assertMember(db, actor.userId, projectId);
+  const admin = (await roleOf(db, actor.userId, projectId)) === 'admin';
+  const rows = await db`
+    select ${entryCols(db)}, not ${notReplaced(db)} as replaced
+    from context_entries ce join users u on u.id = ce.author_id
+    where ce.project_id = ${projectId} and (ce.visibility = 'project' or ce.author_id = ${actor.userId})
+      ${opts.before ? db`and ce.created_at < ${opts.before}` : db``}
+    order by ce.created_at desc, ce.id desc
+    limit ${opts.limit}`;
+  return rows.map(r => ({ ...r, canDelete: admin || r.authorId === actor.userId })) as unknown as ListedEntry[];
+}
+
+// Human-only, like approval: an agent reading another user's text must not be able to erase memory. The author or an admin
+// deletes; someone else's private entry stays invisible. A decision it replaced becomes current again.
+export async function deleteContext(db: Db, actor: Actor, projectId: string, id: string): Promise<void> {
+  humanOnly(actor, 'deleting a memory entry');
+  await assertMember(db, actor.userId, projectId);
+  if (!UUID.test(id)) throw new JunctionError('not_found', 'entry not found');
+  await db.begin(async tx => {
+    const [e] = await tx`
+      select author_id, visibility from context_entries where id = ${id} and project_id = ${projectId} for update`;
+    if (!e || (e.visibility === 'private' && e.authorId !== actor.userId)) throw new JunctionError('not_found', 'entry not found');
+    if (e.authorId !== actor.userId && (await roleOf(tx as unknown as Db, actor.userId, projectId)) !== 'admin') {
+      throw new JunctionError('forbidden', 'only the author or a project admin can delete this');
+    }
+    await tx`delete from context_entries where id = ${id}`;
+  });
 }

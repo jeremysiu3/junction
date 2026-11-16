@@ -1,7 +1,8 @@
-import { activityLog, keyContext } from '@junction/core';
+import { activityLog, keyContext, roleOf } from '@junction/core';
 import { db } from '../../../../lib/db';
-import { dayLabel, exact, rel } from '../../../../lib/format';
+import { dayLabel, errorLine, exact, rel } from '../../../../lib/format';
 import { projectFromSlug } from '../../../../lib/project';
+import { DeleteEntry } from './delete-entry';
 
 const LIMIT = 50;
 
@@ -11,21 +12,23 @@ const when = (d: Date) => {
   return l === 'Today' || l === 'Yesterday' ? l.toLowerCase() : l;
 };
 
-export default async function Memory({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ before?: string }> }) {
+export default async function Memory({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ before?: string; error?: string }> }) {
   const { slug } = await params;
-  const { before: raw } = await searchParams;
+  const { before: raw, error } = await searchParams;
   const parsed = raw ? new Date(raw) : undefined;
   const before = parsed && !Number.isNaN(parsed.getTime()) ? parsed : undefined;
   const { actor, project } = await projectFromSlug(slug);
-  const [keys, log] = await Promise.all([
+  const [keys, log, role] = await Promise.all([
     keyContext(db, actor, project.id),
     activityLog(db, actor, project.id, { before, limit: LIMIT }),
+    roleOf(db, actor.userId, project.id),
   ]);
 
   let last = '';
   return (
     <>
       <div className="page-head"><h1>Memory</h1></div>
+      {error && <p className="error" role="alert">{errorLine(error)}</p>}
       <div className="two">
         <section>
           <h2 className="lbl">Key context</h2>
@@ -39,8 +42,10 @@ export default async function Memory({ params, searchParams }: { params: Promise
                   : `Ownership · since ${when(k.createdAt)}`}
               </div>
               {k.body && <details><summary>Details</summary><p className="kc-body">{k.body}</p></details>}
+              {(role === 'admin' || k.authorId === actor.userId) && <DeleteEntry slug={slug} id={k.id} title={k.title} />}
             </div>
           ))}
+          <p className="box-link"><a href={`/p/${slug}/memory/entries`}>All entries</a></p>
         </section>
         <section>
           <h2 className="lbl">Log</h2>

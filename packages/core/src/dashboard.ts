@@ -114,13 +114,13 @@ export async function badgeCounts(db: Db, actor: Actor, projectId: string): Prom
 }
 
 export type KeyEntry = {
-  id: string; kind: 'decision' | 'ownership'; title: string; body: string; authorName: string; createdAt: Date; replacesTitle: string | null;
+  id: string; kind: 'decision' | 'ownership'; title: string; body: string; authorId: string; authorName: string; createdAt: Date; replacesTitle: string | null;
 };
 
 export async function keyContext(db: Db, actor: Actor, projectId: string): Promise<KeyEntry[]> {
   await assertMember(db, actor.userId, projectId);
   const rows = await db`
-    select ce.id, ce.kind, ce.title, ce.body, u.name as author_name, ce.created_at,
+    select ce.id, ce.kind, ce.title, ce.body, ce.author_id, u.name as author_name, ce.created_at,
            (select o.title from context_entries o where o.id = ce.replaces_id) as replaces_title
     from context_entries ce join users u on u.id = ce.author_id
     where ce.project_id = ${projectId} and ce.visibility = 'project' and ce.kind in ('decision', 'ownership') and ${notReplaced(db)}

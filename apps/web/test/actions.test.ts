@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it, vi } from 'vitest';
-import { createDb, sendTask } from '@junction/core';
+import { createDb, sendTask, writeContext } from '@junction/core';
 import { agent, makeProject } from '@junction/core/test/fixtures';
 
 // The dashboard actions as Jaxon's human, with Next's redirect surfaced as a throw.
@@ -8,7 +8,7 @@ vi.mock('../lib/human', () => ({ requireHuman: async () => ({ userId: me.userId,
 vi.mock('next/cache', () => ({ revalidatePath: () => {} }));
 vi.mock('next/navigation', () => ({ redirect: (to: string) => { throw new Error(`redirect ${to}`); } }));
 
-import { decline, defer, deleteProjectAction } from '../app/p/[slug]/actions';
+import { decline, defer, deleteContextAction, deleteProjectAction } from '../app/p/[slug]/actions';
 
 const db = createDb();
 afterAll(() => db.end());
@@ -54,5 +54,18 @@ describe('deleteProjectAction', () => {
     me.userId = p.jaxon.id;
     const [{ name }] = await db`select name from projects where id = ${p.project.id}`;
     expect(await deleteProjectAction({}, form({ slug: p.project.slug, name }))).toEqual({ error: 'only a project admin can do this' });
+  });
+});
+
+describe('deleteContextAction', () => {
+  it("deletes the author's entry; another member's attempt returns to the page it came from with forbidden", async () => {
+    const p = await makeProject(db);
+    const e = await writeContext(db, agent(p.scott), { projectId: p.project.id, kind: 'note', title: 'Oops', body: 'pasted by mistake' });
+    me.userId = p.jaxon.id;
+    await expect(deleteContextAction(form({ slug: p.project.slug, id: e.id, back: 'entries' }))).rejects.toThrow(`redirect /p/${p.project.slug}/memory/entries?error=forbidden`);
+    await expect(deleteContextAction(form({ slug: p.project.slug, id: e.id }))).rejects.toThrow(`redirect /p/${p.project.slug}/memory?error=forbidden`);
+    me.userId = p.scott.id;
+    await deleteContextAction(form({ slug: p.project.slug, id: e.id }));
+    expect(await db`select 1 from context_entries where id = ${e.id}`).toHaveLength(0);
   });
 });

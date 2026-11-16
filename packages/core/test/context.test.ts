@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { JunctionError, createDb, findOwner, saveArea, searchContext, writeContext } from '../src';
+import { JunctionError, createDb, deleteContext, findOwner, listContext, saveArea, searchContext, writeContext } from '../src';
 import { agent, human, makeProject } from './fixtures';
 
 const db = createDb();
@@ -159,5 +159,65 @@ describe('findOwner', () => {
     await saveArea(db, human(p.jeremy), { projectId: p.project.id, name: 'Reports API', ownerId: p.jaxon.id, description: 'CSV export and reports endpoints' });
     const r = await findOwner(db, agent(p.jeremy), { projectId: p.project.id, topic: 'reports export' });
     expect(r.areas[0]).toMatchObject({ name: 'Reports API', ownerName: 'Jaxon', ownerEmail: p.jaxon.email });
+  });
+});
+
+describe('deleteContext and listContext', () => {
+  type P = Awaited<ReturnType<typeof makeProject>>;
+  const write = (p: P, who: 'jeremy' | 'jaxon' | 'scott', title: string, over: object = {}) =>
+    writeContext(db, agent(p[who]), { projectId: p.project.id, kind: 'note', title, body: 'body of ' + title, ...over });
+  const gone = async (id: string) => (await db`select 1 from context_entries where id = ${id}`).length === 0;
+
+  it('the author or an admin deletes; other members, agents and other projects cannot', async () => {
+    const p = await makeProject(db);
+    const mine = await write(p, 'jaxon', 'Jaxon note');
+    const theirs = await write(p, 'scott', 'Scott note');
+    const other = await makeProject(db);
+    expect(await code(deleteContext(db, agent(p.jaxon), p.project.id, mine.id))).toBe('forbidden');
+    expect(await code(deleteContext(db, human(p.jaxon), p.project.id, theirs.id))).toBe('forbidden');
+    expect(await code(deleteContext(db, human(other.jeremy), other.project.id, mine.id))).toBe('not_found');
+    expect(await code(deleteContext(db, human(p.jaxon), p.project.id, 'not-a-uuid'))).toBe('not_found');
+    await deleteContext(db, human(p.jaxon), p.project.id, mine.id);
+    await deleteContext(db, human(p.jeremy), p.project.id, theirs.id); // admin
+    expect(await gone(mine.id)).toBe(true);
+    expect(await gone(theirs.id)).toBe(true);
+  });
+
+  it("someone else's private entry is not found, even for an admin", async () => {
+    const p = await makeProject(db);
+    const secret = await write(p, 'jaxon', 'Private note', { visibility: 'private' });
+    expect(await code(deleteContext(db, human(p.jeremy), p.project.id, secret.id))).toBe('not_found');
+    await deleteContext(db, human(p.jaxon), p.project.id, secret.id);
+    expect(await gone(secret.id)).toBe(true);
+  });
+
+  it('deleting a replacement makes the old decision current again; a replaced decision can be deleted', async () => {
+    const p = await makeProject(db);
+    const old = await write(p, 'jeremy', 'Use kiwi queue', { kind: 'decision' });
+    const next = await write(p, 'jaxon', 'Use kiwi stream', { kind: 'decision', replaces: old.id });
+    await deleteContext(db, human(p.jaxon), p.project.id, next.id);
+    expect((await searchContext(db, agent(p.scott), { projectId: p.project.id, query: 'kiwi' })).map(e => e.id)).toEqual([old.id]);
+    const again = await write(p, 'jaxon', 'Use kiwi bus', { kind: 'decision', replaces: old.id });
+    await deleteContext(db, human(p.jeremy), p.project.id, old.id);
+    const [r] = await db`select replaces_id from context_entries where id = ${again.id}`;
+    expect(r.replacesId).toBeNull();
+  });
+
+  it('lists project entries plus your own private ones, newest first, with canDelete and replaced, paged by before', async () => {
+    const p = await makeProject(db);
+    const a = await write(p, 'jaxon', 'A');
+    const b = await write(p, 'scott', 'B', { kind: 'decision' });
+    const c = await write(p, 'jaxon', 'C', { visibility: 'private' });
+    await write(p, 'scott', 'D', { visibility: 'private' });
+    const e = await write(p, 'scott', 'E', { kind: 'decision', replaces: b.id });
+    const list = await listContext(db, human(p.jaxon), p.project.id, { limit: 50 });
+    expect(list.map(x => x.title)).toEqual(['E', 'C', 'B', 'A']);
+    expect(list.map(x => [x.title, x.canDelete, x.replaced])).toEqual([['E', false, false], ['C', true, false], ['B', false, true], ['A', true, false]]);
+    expect((await listContext(db, human(p.jeremy), p.project.id, { limit: 50 })).every(x => x.canDelete)).toBe(true);
+    const page = await listContext(db, human(p.jaxon), p.project.id, { limit: 2 });
+    expect(page.map(x => x.id)).toEqual([e.id, c.id]);
+    const next = await listContext(db, human(p.jaxon), p.project.id, { limit: 2, before: page[1].createdAt });
+    expect(next.map(x => x.id)).toEqual([b.id, a.id]);
+    expect(await code(listContext(db, human((await makeProject(db)).jeremy), p.project.id, { limit: 5 }))).toBe('forbidden');
   });
 });

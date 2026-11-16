@@ -1,6 +1,6 @@
 'use server';
 import {
-  answerQuestion, approveTask, cancelInvite, createInvite, declineTask, deferTask, deleteAccount, deleteProject, getTaskDetail, hasLink, JunctionError, listConnections, listMembers, markAbandoned, markDashboardSeen,
+  answerQuestion, approveTask, cancelInvite, createInvite, declineTask, deferTask, deleteAccount, deleteContext, deleteProject, getTaskDetail, hasLink, JunctionError, listConnections, listMembers, markAbandoned, markDashboardSeen,
   projectForMember, projectsFor, removeMember, renameProject, retryTask, revokeWorkerCredential, saveArea, setRole, setStaleDays, unapproveTask, userProfile, type Actor,
 } from '@junction/core';
 import { revalidatePath } from 'next/cache';
@@ -60,7 +60,7 @@ export const unapproveAction = async (slug: string, id: string) =>
   inboxAction(slug, id, (actor) => unapproveTask(db, actor, id), 'Too late, the task has already started.');
 
 // Same pattern as run(), but the project is re-derived from the hidden slug.
-async function runProject(formData: FormData, page: '' | 'settings' | 'account', fn: (actor: Actor, projectId: string) => Promise<unknown>) {
+async function runProject(formData: FormData, page: '' | 'settings' | 'account' | 'memory' | 'memory/entries', fn: (actor: Actor, projectId: string) => Promise<unknown>) {
   const slug = String(formData.get('slug'));
   const actor = await requireHuman();
   try {
@@ -87,6 +87,10 @@ export const setStaleDaysAction = async (formData: FormData) =>
 
 export const renameProjectAction = async (formData: FormData) =>
   runProject(formData, 'settings', (actor, projectId) => renameProject(db, actor, projectId, String(formData.get('name') ?? '')));
+
+export const deleteContextAction = async (formData: FormData) =>
+  runProject(formData, formData.get('back') === 'entries' ? 'memory/entries' : 'memory', (actor, projectId) =>
+    deleteContext(db, actor, projectId, String(formData.get('id'))));
 
 export const cancelInviteAction = async (formData: FormData) =>
   runProject(formData, 'settings', (actor, projectId) => cancelInvite(db, actor, projectId, String(formData.get('id'))));
