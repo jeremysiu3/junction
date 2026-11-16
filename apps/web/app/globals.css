@@ -419,6 +419,9 @@ details.fold > summary .lbl { margin: 0; }
 
 .snippet { font-family: var(--font-mono); font-size: var(--text-sm); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); margin: var(--space-1) 0 var(--space-2); overflow-x: auto; user-select: all; }
 .sec { margin-bottom: var(--space-5); }
+/* Project settings: rename and repos side by side; one column when narrow or when only one is shown */
+.halves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 0 22px; align-items: start; }
+.halves > .sec:only-child { grid-column: 1 / -1; }
 .kc .acts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
 .kc .acts details { margin-top: 0; }
 

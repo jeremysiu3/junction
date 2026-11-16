@@ -45,18 +45,28 @@ export default async function Settings({ params, searchParams }: { params: Promi
     <>
       <div className="page-head"><h1>Project settings</h1></div>
       {error && <p className="error" role="alert">{errorLine(error)}</p>}
-      {admin && (
+      <div className="halves">
+        {admin && (
+          <section className="sec">
+            <h2 className="lbl">Project</h2>
+            <div className="kc">
+              <form action={renameProjectAction} className="form">
+                <input type="hidden" name="slug" value={slug} />
+                <label>Name<input name="name" required maxLength={60} defaultValue={project.name} /></label>
+                <div><button className="primary">Rename</button></div>
+              </form>
+            </div>
+          </section>
+        )}
         <section className="sec">
-          <h2 className="lbl">Project</h2>
+          <h2 className="lbl">Repos</h2>
           <div className="kc">
-            <form action={renameProjectAction} className="form">
-              <input type="hidden" name="slug" value={slug} />
-              <label>Name<input name="name" required maxLength={60} defaultValue={project.name} /></label>
-              <div><button className="primary">Rename</button></div>
-            </form>
+            <p className="m">Commit this as <code>junction.json</code> at the root of each repo in this project, with the repo&apos;s name. Agents working in the repo read it to find this project.</p>
+            <pre className="snippet">{`{"project":"${project.slug}","repo":"your-repo"}`}</pre>
+            <p className="m">For background work, also map the repo to its local folder in your worker&apos;s <code>~/.junction/worker.json</code>. The <a href={`/p/${slug}/setup`}>agent setup</a> page shows how.</p>
           </div>
         </section>
-      )}
+      </div>
       <details className="sec fold" open>
         <summary><h2 className="lbl">Members</h2></summary>
         {members.map((m) => (
@@ -103,14 +113,6 @@ export default async function Settings({ params, searchParams }: { params: Promi
           </>
         )}
       </details>
-      <section className="sec">
-        <h2 className="lbl">Repos</h2>
-        <div className="kc">
-          <p className="m">Commit this as <code>junction.json</code> at the root of each repo in this project, with the repo&apos;s name. Agents working in the repo read it to find this project.</p>
-          <pre className="snippet">{`{"project":"${project.slug}","repo":"your-repo"}`}</pre>
-          <p className="m">For background work, also map the repo to its local folder in your worker&apos;s <code>~/.junction/worker.json</code>. The <a href={`/p/${slug}/setup`}>agent setup</a> page shows how.</p>
-        </div>
-      </section>
       <div className="two">
         <details className="fold" open>
           <summary><h2 className="lbl">Responsibilities</h2></summary>
