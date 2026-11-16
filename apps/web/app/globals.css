@@ -406,6 +406,12 @@ details.fold > summary::before { content: '▶'; color: var(--muted); font-size:
 details.fold[open] > summary::before { transform: rotate(90deg); }
 details.fold > summary .lbl { margin: 0; }
 .kc-body { margin-top: var(--space-2); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.folders { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.folders a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border: 1px solid var(--line); border-radius: var(--radius-pill); color: var(--ink-2); font-size: var(--text-sm); }
+.folders a:hover { background: var(--hover); color: var(--ink); text-decoration: none; }
+.folders a.active { background: var(--hover); color: var(--ink); font-weight: 600; border-color: var(--ink-2); }
+.folders .c { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+.tagbar { margin-bottom: var(--space-3); font-size: var(--text-sm); color: var(--ink-2); }
 .log { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 12px 10px; }
 .log .day { margin: 12px 0 2px; }
 .ev { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: baseline; }

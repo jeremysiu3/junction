@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { JunctionError, createDb, deleteContext, findOwner, listContext, saveArea, searchContext, writeContext } from '../src';
+import { JunctionError, contextCounts, createDb, deleteContext, findOwner, listContext, saveArea, searchContext, writeContext } from '../src';
 import { agent, human, makeProject } from './fixtures';
 
 const db = createDb();
@@ -201,6 +201,21 @@ describe('deleteContext and listContext', () => {
     await deleteContext(db, human(p.jeremy), p.project.id, old.id);
     const [r] = await db`select replaces_id from context_entries where id = ${again.id}`;
     expect(r.replacesId).toBeNull();
+  });
+
+  it('filters by kind and tag; counts per kind follow the tag and visibility', async () => {
+    const p = await makeProject(db);
+    await write(p, 'jaxon', 'Auth note', { tags: ['auth', 'web'] });
+    await write(p, 'scott', 'Auth decision', { kind: 'decision', tags: ['auth'] });
+    await write(p, 'scott', 'Billing decision', { kind: 'decision', tags: ['billing'] });
+    await write(p, 'scott', 'Scott private auth', { tags: ['auth'], visibility: 'private' });
+    const titles = async (o: object) => (await listContext(db, human(p.jaxon), p.project.id, { limit: 50, ...o })).map(x => x.title).sort();
+    expect(await titles({ kind: 'decision' })).toEqual(['Auth decision', 'Billing decision']);
+    expect(await titles({ tag: 'auth' })).toEqual(['Auth decision', 'Auth note']);
+    expect(await titles({ kind: 'decision', tag: 'auth' })).toEqual(['Auth decision']);
+    expect(await contextCounts(db, human(p.jaxon), p.project.id)).toEqual({ all: 3, decision: 2, note: 1, update: 0, ownership: 0 });
+    expect(await contextCounts(db, human(p.jaxon), p.project.id, 'auth')).toEqual({ all: 2, decision: 1, note: 1, update: 0, ownership: 0 });
+    expect(await contextCounts(db, human(p.scott), p.project.id, 'auth')).toEqual({ all: 3, decision: 1, note: 2, update: 0, ownership: 0 });
   });
 
   it('lists project entries plus your own private ones, newest first, with canDelete and replaced, paged by before', async () => {

@@ -112,7 +112,7 @@ export type ListedEntry = ContextEntryWithAuthor & { replaced: boolean; canDelet
 
 // Everything the viewer can see in the project (project entries and their own private ones), newest first, for the dashboard.
 export async function listContext(
-  db: Db, actor: Actor, projectId: string, opts: { limit: number; before?: Date },
+  db: Db, actor: Actor, projectId: string, opts: { limit: number; before?: Date; kind?: ContextEntry['kind']; tag?: string },
 ): Promise<ListedEntry[]> {
   await assertMember(db, actor.userId, projectId);
   const admin = (await roleOf(db, actor.userId, projectId)) === 'admin';
@@ -121,9 +121,26 @@ export async function listContext(
     from context_entries ce join users u on u.id = ce.author_id
     where ce.project_id = ${projectId} and (ce.visibility = 'project' or ce.author_id = ${actor.userId})
       ${opts.before ? db`and ce.created_at < ${opts.before}` : db``}
+      ${opts.kind ? db`and ce.kind = ${opts.kind}` : db``}
+      ${opts.tag ? db`and ${opts.tag} = any(ce.tags)` : db``}
     order by ce.created_at desc, ce.id desc
     limit ${opts.limit}`;
   return rows.map(r => ({ ...r, canDelete: admin || r.authorId === actor.userId })) as unknown as ListedEntry[];
+}
+
+// Folder sizes for the dashboard's All entries page, over what the viewer can see, narrowed to a tag when given.
+export async function contextCounts(
+  db: Db, actor: Actor, projectId: string, tag?: string,
+): Promise<{ all: number; decision: number; note: number; update: number; ownership: number }> {
+  await assertMember(db, actor.userId, projectId);
+  const [r] = await db`
+    select count(*)::int as all,
+           count(*) filter (where kind = 'decision')::int as decision, count(*) filter (where kind = 'note')::int as note,
+           count(*) filter (where kind = 'update')::int as update, count(*) filter (where kind = 'ownership')::int as ownership
+    from context_entries
+    where project_id = ${projectId} and (visibility = 'project' or author_id = ${actor.userId})
+      ${tag ? db`and ${tag} = any(tags)` : db``}`;
+  return r as { all: number; decision: number; note: number; update: number; ownership: number };
 }
 
 // Human-only, like approval: an agent reading another user's text must not be able to erase memory. The author or an admin
