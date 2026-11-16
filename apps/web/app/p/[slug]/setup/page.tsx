@@ -11,7 +11,7 @@ export default async function Setup({ params }: { params: Promise<{ slug: string
   const [o, { agentConnected, workerSeen }] = await Promise.all([origin(), setupState(db, actor, project.id)]);
   return (
     <>
-      <div className="page-head"><h1>Set up {project.name}</h1><Live /></div>
+      <div className="page-head"><h1>Agent setup</h1><Live /></div>
       <div className="card">
         <h2 className="lbl">Step 1 · Connect your agent {agentConnected && <span className="p-ok">✓ Agent connected</span>}</h2>
         <h4>Claude Code</h4>

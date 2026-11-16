@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { Lockup } from '../../lockup';
 import { requireHuman } from '../../../lib/human';
 import { loopbackRedirect } from '../../../lib/next';
 import { supabaseServer } from '../../../lib/supabase';
@@ -14,7 +15,7 @@ export default async function Consent({ searchParams }: { searchParams: Promise<
   return (
     <main className="auth">
       <div className="card">
-        <div className="brand">Junction</div>
+        <div className="auth-lockup"><Lockup stacked /></div>
         {error || !data ? (
           <p className="error">This authorization request is invalid or has expired.</p>
         ) : (

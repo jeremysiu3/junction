@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { db } from '../../../lib/db';
 import { projectFromSlug } from '../../../lib/project';
 import { signOut } from '../../login/actions';
+import { Lockup } from '../../lockup';
 import { Avatar } from './avatar';
 import { NavLink } from './nav-link';
 import { SidebarToggle } from './sidebar-toggle';
@@ -27,7 +28,7 @@ export default async function ProjectLayout({ children, params }: { children: Re
     <div className={`shell${mini ? ' mini' : ''}`}>
       <aside className="sidebar">
         <div className="top">
-          <div className="brand">Junction</div>
+          <Lockup />
           <SidebarToggle mini={mini} />
         </div>
         <details className="project-switch">

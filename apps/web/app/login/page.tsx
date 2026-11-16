@@ -1,3 +1,4 @@
+import { Lockup } from '../lockup';
 import { devLoginEnabled } from '../../lib/human';
 import { SignInForms } from './sign-in-forms';
 
@@ -9,9 +10,9 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
   return (
     <main className="auth">
       <div className="card">
-        <div className="brand">Junction</div>
-        <h1>Sign in to Junction</h1>
-        <p className="muted">Approve requests and see what your team&apos;s agents are doing.</p>
+        <div className="auth-lockup"><Lockup stacked /></div>
+        <h1>Sign in</h1>
+        <p className="muted">See what your team&apos;s agents are doing.</p>
         {deleted && <p className="muted" style={{ marginTop: 'var(--space-4)', marginBottom: 0 }}>Your account was deleted.</p>}
         {error && <p className="error" style={{ marginTop: 'var(--space-4)', marginBottom: 0 }}>{error === 'email_taken' ? EMAIL_TAKEN : 'Sign in failed. Try again.'}</p>}
         <SignInForms next={next} dev={dev} />

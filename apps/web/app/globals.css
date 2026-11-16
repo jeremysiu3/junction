@@ -5,6 +5,7 @@
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   --bg: #0e0f12;
+  --glow: rgba(95, 212, 122, 0.06);
   --panel: #15161a;
   --raised: #1b1d22;
   --hover: #22242a;
@@ -52,6 +53,7 @@
 @media (prefers-color-scheme: light) {
   :root {
     --bg: #f7f7f8;
+    --glow: rgba(26, 112, 56, 0.05);
     --panel: #fcfcfd;
     --raised: #fcfcfd;
     --hover: #f0f0f2;
@@ -116,7 +118,15 @@ code, .mono { font-family: var(--font-mono); font-size: var(--text-sm); color: v
 }
 .sidebar a { color: inherit; }
 .sidebar .top { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-2); }
-.brand { font-weight: 700; font-size: var(--text-lg); letter-spacing: -0.02em; padding: 4px 8px 2px; }
+/* logo lockup: sized by font-size; --cap is Overpass's cap height (1400/2000 em), so web and landing match without loading Overpass */
+.lk { --cap: 0.7em; display: inline-flex; align-items: center; gap: calc(var(--cap) * 0.5); line-height: 1; }
+.lk .wm { height: var(--cap); width: auto; flex: none; overflow: visible; }
+.lk .tile { width: calc(var(--cap) * 1.9); height: calc(var(--cap) * 1.9); flex: none; border-radius: 22%; background: #050506; display: grid; place-items: center; }
+.lk .tile img { height: calc(var(--cap) * 1.37); width: auto; filter: brightness(1.3) drop-shadow(0 0 calc(var(--cap) * 0.1) rgba(95, 212, 122, 0.9)) drop-shadow(0 0 calc(var(--cap) * 0.45) rgba(95, 212, 122, 0.4)); }
+.lk-stack { flex-direction: column; gap: calc(var(--cap) * 0.45); }
+.lk-stack .tile { width: calc(var(--cap) * 2.6); height: calc(var(--cap) * 2.6); }
+.lk-stack .tile img { height: calc(var(--cap) * 1.875); transform: translateX(calc(var(--cap) * 0.04)); }
+.sidebar .top .lk { font-size: 18px; margin-left: 8px; }
 .sidebar-toggle { padding: 5px; border: 0; background: none; color: var(--muted); display: flex; }
 .sidebar-toggle:hover { background: var(--hover); color: var(--ink); }
 .project-switch, .account { position: relative; font-size: var(--text-sm); }
@@ -212,11 +222,12 @@ span.avatar { display: flex; align-items: center; justify-content: center; backg
 
 /* collapsed sidebar: icons only (wide screens; the narrow layout stacks instead) */
 @media (min-width: 901px) {
-  .shell.mini .brand, .shell.mini .project-switch, .shell.mini .lbltxt, .shell.mini .account .name, .shell.mini .account .chev { display: none; }
+  .shell.mini .lk .wm, .shell.mini .project-switch, .shell.mini .lbltxt, .shell.mini .account .name, .shell.mini .account .chev { display: none; }
   .shell.mini .sidebar { overflow: visible; } /* the account menu opens to the right of the rail */
   .shell.mini .account summary { justify-content: center; }
   .shell.mini .account .menu { left: calc(100% + 18px); right: auto; bottom: 0; min-width: 14rem; }
-  .shell.mini .sidebar .top { justify-content: center; }
+  .shell.mini .sidebar .top { flex-direction: column; justify-content: center; gap: var(--space-2); } /* tile above the expand toggle */
+  .shell.mini .sidebar .top .lk { margin-left: 0; }
   .shell.mini .nav a { justify-content: center; position: relative; }
   .shell.mini .nav .count { position: absolute; top: 2px; left: calc(50% + 2px); margin: 0; box-shadow: 0 0 0 2px var(--panel); }
 }
@@ -262,6 +273,7 @@ dl.fields dd { margin: 0; }
 
 /* forms and buttons */
 button, .button {
+  display: inline-block; text-decoration: none;
   font: inherit; font-size: var(--text-sm); font-weight: 600;
   padding: 8px 15px;
   border-radius: var(--radius-sm);
@@ -269,9 +281,9 @@ button, .button {
   background: var(--raised); color: var(--ink);
   cursor: pointer;
 }
-button:hover { background: var(--hover); }
-button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-button.primary:hover { filter: brightness(1.08); }
+button:hover, .button:hover { background: var(--hover); text-decoration: none; }
+button.primary, .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.primary:hover, .button.primary:hover { filter: brightness(1.08); }
 button.danger { color: var(--red); border-color: var(--red-soft); }
 button.danger:hover { background: var(--red-soft); }
 input, select, textarea {
@@ -308,14 +320,22 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 }
 
 /* login and no-project screens */
-.auth { min-height: 100vh; display: grid; place-items: center; padding: var(--space-4); }
-.auth .card { width: 100%; max-width: 22rem; padding: var(--space-6); }
+.auth {
+  min-height: 100vh; display: grid; place-items: center; padding: var(--space-4);
+  background: radial-gradient(60% 50% at 50% 38%, var(--glow), transparent 70%), var(--bg);
+}
+.auth .card { width: 100%; max-width: 22rem; padding: 0; background: none; border: 0; text-align: center; }
+.auth-lockup { display: flex; justify-content: center; font-size: 30px; margin-bottom: 34px; }
 .auth h1 { font-size: var(--text-xl); margin-bottom: var(--space-1); }
-.auth form { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-4); }
-.auth .menu { display: flex; flex-direction: column; gap: 2px; margin: var(--space-4) 0; }
+.auth form { display: flex; flex-direction: column; gap: var(--space-3); margin-top: 28px; text-align: left; }
+.auth details { text-align: left; }
+.auth .menu { display: flex; flex-direction: column; gap: 2px; margin: var(--space-4) 0; text-align: left; }
 .auth .menu a { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); border-radius: var(--radius-sm); color: var(--ink-2); }
 .auth .menu a:hover { color: var(--ink); background: var(--hover); text-decoration: none; }
-.auth .brand { padding: 0; margin-bottom: var(--space-4); }
+.auth .terms { margin: 18px 0 0; font-size: 12.5px; }
+.auth .terms a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; }
+button.gh { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 16px; font-size: 15px; background: var(--ink); border-color: var(--ink); color: var(--bg); }
+button.gh:hover { background: var(--ink); filter: brightness(1.08); }
 
 @media (max-width: 900px) {
   .shell, .shell.mini { grid-template-columns: 1fr; }
@@ -376,6 +396,13 @@ button.text:hover { color: var(--ink); }
 .kc .m { color: var(--muted); font-size: var(--text-sm); margin-top: 2px; }
 .kc details { margin-top: var(--space-2); font-size: var(--text-sm); }
 .kc details > summary { cursor: pointer; color: var(--muted); }
+.kc details[open] > summary { margin-bottom: var(--space-3); }
+/* collapsible settings sections: the section label is the toggle */
+details.fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 6px; margin-bottom: var(--space-2); }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before { content: '▶'; color: var(--muted); font-size: 9px; transition: transform 0.15s; }
+details.fold[open] > summary::before { transform: rotate(90deg); }
+details.fold > summary .lbl { margin: 0; }
 .kc-body { margin-top: var(--space-2); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
 .log { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 12px 10px; }
 .log .day { margin: 12px 0 2px; }
@@ -392,5 +419,35 @@ button.text:hover { color: var(--ink); }
 
 .snippet { font-family: var(--font-mono); font-size: var(--text-sm); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); margin: var(--space-1) 0 var(--space-2); overflow-x: auto; user-select: all; }
 .sec { margin-bottom: var(--space-5); }
+/* Project settings: rename and repos side by side; one column when narrow or when only one is shown */
+.halves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 0 22px; align-items: start; }
+.halves > .sec:only-child { grid-column: 1 / -1; }
 .kc .acts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
 .kc .acts details { margin-top: 0; }
+
+/* signal 404: the "don't walk" pair. Housing stays black in both themes. */
+.sig { display: grid; gap: 8px; padding: 10px; width: max-content; margin: 0 auto; background: #050506; border-radius: 14px; box-shadow: 0 0 0 1px #2a2c31, 0 18px 40px -18px #000; }
+.sig .lp { width: 120px; height: 120px; border-radius: 9px; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #121315, #09090a 70%); box-shadow: inset 0 10px 12px -8px #000; }
+.sig .lp.on { background: radial-gradient(circle, rgba(243, 154, 43, 0.18), transparent 68%), radial-gradient(circle at 50% 45%, #121315, #09090a 70%); }
+.sig .lp.off img { width: 58px; opacity: 0.13; filter: saturate(0.2); }
+.nf { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px var(--gutter, 16px); }
+main.nf { min-height: 100vh; }
+.nf h1 { font: 800 44px/1 var(--font-body); letter-spacing: -0.035em; line-height: 1; margin: 34px 0 10px; }
+.nf p { color: var(--muted); margin: 0; }
+.nf .acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
+
+/* loading skeletons (skeleton.tsx). The wrapper fades in after 300ms, so a fast navigation never shows grey blocks. */
+.sk-page { animation: sk-in 0.2s ease-out 0.3s both; }
+.sk { display: block; background: var(--hover); border-radius: 4px; animation: sk-pulse 1.6s ease-in-out infinite; }
+.sk-lines { display: flex; flex-direction: column; gap: var(--space-2); }
+/* keep the slots the real headings take (one line box each), so the content below starts where it does on the loaded page */
+.sk-page .page-head { min-height: 30px; align-items: center; }
+.sk-page .page-head p, .sk-page .lbl, .sk-page .colh, .sk-page .kc .t, .sk-page .kc .m { min-height: calc(1em * var(--leading)); }
+@media (prefers-color-scheme: light) { .sk { background: var(--line); } }
+@keyframes sk-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sk-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+/* no fade and no pulse; the 300ms delay still holds the blocks back for fast loads */
+@media (prefers-reduced-motion: reduce) {
+  .sk-page { animation-duration: 0s; }
+  .sk { animation: none; opacity: 0.8; }
+}
