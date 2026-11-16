@@ -1,8 +1,9 @@
-import { activityLog, keyContext, roleOf } from '@junction/core';
+import { activityLog, contextCounts, keyContext, roleOf } from '@junction/core';
 import { db } from '../../../../lib/db';
 import { dayLabel, errorLine, exact, rel } from '../../../../lib/format';
 import { projectFromSlug } from '../../../../lib/project';
 import { DeleteEntry } from './delete-entry';
+import { Folders } from './folders';
 
 const LIMIT = 50;
 
@@ -18,10 +19,11 @@ export default async function Memory({ params, searchParams }: { params: Promise
   const parsed = raw ? new Date(raw) : undefined;
   const before = parsed && !Number.isNaN(parsed.getTime()) ? parsed : undefined;
   const { actor, project } = await projectFromSlug(slug);
-  const [keys, log, role] = await Promise.all([
+  const [keys, log, role, counts] = await Promise.all([
     keyContext(db, actor, project.id),
     activityLog(db, actor, project.id, { before, limit: LIMIT }),
     roleOf(db, actor.userId, project.id),
+    contextCounts(db, actor, project.id),
   ]);
 
   let last = '';
@@ -29,6 +31,7 @@ export default async function Memory({ params, searchParams }: { params: Promise
     <>
       <div className="page-head"><h1>Memory</h1></div>
       {error && <p className="error" role="alert">{errorLine(error)}</p>}
+      <Folders base={`/p/${slug}/memory/entries`} counts={counts} />
       <div className="two">
         <section>
           <h2 className="lbl">Key context</h2>

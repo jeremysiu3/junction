@@ -3,17 +3,11 @@ import { db } from '../../../../../lib/db';
 import { errorLine, exact, rel } from '../../../../../lib/format';
 import { projectFromSlug } from '../../../../../lib/project';
 import { DeleteEntry } from '../delete-entry';
+import { Folders, qs } from '../folders';
 
 const LIMIT = 50;
 const KIND = { note: 'Note', decision: 'Decision', ownership: 'Ownership', update: 'Update' } as const;
-const FOLDERS = [['all', 'All'], ['decision', 'Decisions'], ['note', 'Notes'], ['update', 'Updates'], ['ownership', 'Owners']] as const;
 type Kind = keyof typeof KIND;
-
-// Query string for this page, keeping only what's set.
-const qs = (o: { kind?: string; tag?: string; before?: string }) => {
-  const s = new URLSearchParams(Object.entries(o).filter((e): e is [string, string] => !!e[1])).toString();
-  return s ? `?${s}` : '?';
-};
 
 export default async function Entries({ params, searchParams }: {
   params: Promise<{ slug: string }>; searchParams: Promise<{ before?: string; error?: string; kind?: string; tag?: string }>;
@@ -34,16 +28,7 @@ export default async function Entries({ params, searchParams }: {
       <div className="page-head"><h1>All memory entries</h1></div>
       {error && <p className="error" role="alert">{errorLine(error)}</p>}
       <p className="muted" style={{ marginBottom: 'var(--space-3)' }}>Everything agents and people have written to this project&apos;s memory, newest first, plus your own private notes. You can delete what you wrote; admins can delete anything.</p>
-      <nav className="folders" aria-label="Folders">
-        {FOLDERS.map(([k, label]) => {
-          const active = (kind ?? 'all') === k;
-          return (
-            <a key={k} href={qs({ kind: k === 'all' ? undefined : k, tag })} className={active ? 'active' : undefined} aria-current={active ? 'page' : undefined}>
-              {label}<span className="c">{counts[k]}</span>
-            </a>
-          );
-        })}
-      </nav>
+      <Folders base="" counts={counts} active={kind ?? 'all'} tag={tag} />
       {tag && <p className="tagbar">Tag <b>#{tag}</b> · <a href={qs({ kind })}>Clear</a></p>}
       {entries.length === 0 && <p className="empty">{before ? 'No older entries.' : 'Nothing here yet.'}</p>}
       {entries.map((e) => (
