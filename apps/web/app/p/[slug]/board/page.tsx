@@ -35,6 +35,11 @@ export default async function Board({ params }: { params: Promise<{ slug: string
     { title: 'Needs a person', cards: board.needsPerson, hot: true },
     { title: 'In review', cards: board.inReview },
   ];
+  const closed = [
+    { title: 'Done', cards: board.done },
+    { title: 'Declined', cards: board.declined },
+    { title: 'Cancelled', cards: board.cancelled },
+  ];
   return (
     <>
       <div className="page-head"><h1>Board</h1><Live /></div>
@@ -49,17 +54,19 @@ export default async function Board({ params }: { params: Promise<{ slug: string
           </section>
         ))}
       </div>
-      <details className="done">
-        <summary>Done and declined ({board.done.length})</summary>
-        {board.done.map((c) => (
-          <a key={`${c.kind}-${c.id}`} className="done-row" href={href(slug, c)}>
-            <Pill status={c.status} />
-            <span className="t">{c.title}</span>
-            <span>{c.kind === 'request' ? 'Request' : 'Work'}</span>
-            <span className="age" title={exact(c.since)}>{rel(c.since)}</span>
-          </a>
-        ))}
-      </details>
+      {closed.map((list) => (list.cards.length > 0 || list.title === 'Done') && (
+        <details key={list.title} className="done">
+          <summary>{list.title} ({list.cards.length})</summary>
+          {list.cards.map((c) => (
+            <a key={`${c.kind}-${c.id}`} className="done-row" href={href(slug, c)}>
+              <Pill status={c.status} />
+              <span className="t">{c.title}</span>
+              <span>{c.kind === 'request' ? 'Request' : 'Work'}</span>
+              <span className="age" title={exact(c.since)}>{rel(c.since)}</span>
+            </a>
+          ))}
+        </details>
+      ))}
     </>
   );
 }

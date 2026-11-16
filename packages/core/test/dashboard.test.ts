@@ -106,7 +106,7 @@ describe('boardColumns', () => {
   const expected: [TaskStatus, string][] = [
     ['pending_approval', 'waiting'], ['approved', 'inProgress'], ['in_progress', 'inProgress'],
     ['needs_input', 'needsPerson'], ['stuck', 'needsPerson'], ['ready_for_review', 'inReview'], ['in_review', 'inReview'],
-    ['done', 'done'], ['declined', 'done'], ['cancelled', 'done'],
+    ['done', 'done'], ['declined', 'declined'], ['cancelled', 'cancelled'],
   ];
   test.each(expected)('maps %s to %s', async (status, column) => {
     const p = await makeProject(db);
@@ -126,7 +126,7 @@ describe('boardColumns', () => {
     expect(board.inProgress[0]).toMatchObject({ kind: 'work', id: w.id, from: null, to: null, owner: 'Scott', area: null, prNumber: null });
   });
 
-  it('active work in inProgress, merged/abandoned in done, a work item whose key is an open task branch in the same repo is hidden', async () => {
+  it('active work in inProgress, merged in done, abandoned in cancelled, a work item whose key is an open task branch in the same repo is hidden', async () => {
     const p = await makeProject(db);
     const t = await claimed(p, 'Contact form');
     const work = (key: string, repo = 'site', status?: 'merged' | 'abandoned') =>
@@ -138,23 +138,38 @@ describe('boardColumns', () => {
     const dropped = await work('feat/dropped', 'site', 'abandoned');
     const board = await boardColumns(db, human(p.jeremy), p.project.id);
     expect(board.inProgress.map(c => c.id).sort()).toEqual([t.id, otherRepo.id, plain.id].sort());
-    expect(board.done.map(c => c.id).sort()).toEqual([merged.id, dropped.id].sort());
+    expect(board.done.map(c => c.id)).toEqual([merged.id]);
+    expect(board.cancelled.map(c => c.id)).toEqual([dropped.id]);
   });
 
-  it('done is the 20 most recent across tasks and work; in_review prNumber from evidence_url /pull/12', async () => {
+  it('each closed list is its own 20 most recent; newer cancellations never push out done; in_review prNumber from evidence_url /pull/12', async () => {
     const p = await makeProject(db);
-    const old = await reach(p, 'declined', 'oldest');
+    const finished = await reach(p, 'done', 'real work');
+    await backdateTask(finished.id, 1);
+    const old = await reach(p, 'cancelled', 'oldest');
     await backdateTask(old.id, 5);
-    for (let i = 0; i < 10; i++) await reach(p, 'cancelled', `c${i}`);
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) await reach(p, 'cancelled', `c${i}`);
+    for (let i = 0; i < 20; i++) {
       await recordWork(db, agent(p.jaxon), { projectId: p.project.id, repo: 'site', key: `m${i}`, title: `m${i}`, summary: 's', done: [], notDone: [], status: 'merged' });
     }
     const t = await reach(p, 'in_review');
     const board = await boardColumns(db, human(p.jeremy), p.project.id);
+    expect(board.cancelled).toHaveLength(20);
+    expect(board.cancelled.map(c => c.id)).not.toContain(old.id);
     expect(board.done).toHaveLength(20);
-    expect(board.done.map(c => c.id)).not.toContain(old.id);
+    expect(board.done.map(c => c.id)).not.toContain(finished.id);
     expect(board.done.every((c, i, a) => i === 0 || +a[i - 1].since >= +c.since)).toBe(true);
     expect(board.inReview).toMatchObject([{ id: t.id, prNumber: 12 }]);
+  });
+
+  it('a done task stays listed after 20 newer cancellations', async () => {
+    const p = await makeProject(db);
+    const finished = await reach(p, 'done', 'real work');
+    await backdateTask(finished.id, 1);
+    for (let i = 0; i < 20; i++) await reach(p, 'cancelled', `c${i}`);
+    const board = await boardColumns(db, human(p.jeremy), p.project.id);
+    expect(board.done.map(c => c.id)).toEqual([finished.id]);
+    expect(board.cancelled).toHaveLength(20);
   });
 
   it('old = since older than staleDays', async () => {
@@ -341,7 +356,7 @@ describe('empty project and access', () => {
     expect(await activityLog(db, human(p.jaxon), p.project.id)).toEqual([]);
     expect(await overviewNews(db, human(p.jaxon), p.project.id)).toEqual([]);
     expect(await agentPanel(db, human(p.jaxon), p.project.id)).toEqual([]);
-    expect(await boardColumns(db, human(p.jaxon), p.project.id)).toEqual({ waiting: [], inProgress: [], needsPerson: [], inReview: [], done: [] });
+    expect(await boardColumns(db, human(p.jaxon), p.project.id)).toEqual({ waiting: [], inProgress: [], needsPerson: [], inReview: [], done: [], declined: [], cancelled: [] });
     expect(await badgeCounts(db, human(p.jaxon), p.project.id)).toEqual({ inbox: 0, attention: 0 });
   });
 

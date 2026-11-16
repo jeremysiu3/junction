@@ -37,7 +37,7 @@ export type BoardCard = {
   kind: 'request' | 'work'; id: string; title: string; status: TaskStatus | WorkStatus; background: boolean;
   from: string | null; to: string | null; owner: string | null; area: string | null; prNumber: number | null; since: Date; old: boolean;
 };
-export type Board = { waiting: BoardCard[]; inProgress: BoardCard[]; needsPerson: BoardCard[]; inReview: BoardCard[]; done: BoardCard[] };
+export type Board = { waiting: BoardCard[]; inProgress: BoardCard[]; needsPerson: BoardCard[]; inReview: BoardCard[]; done: BoardCard[]; declined: BoardCard[]; cancelled: BoardCard[] };
 
 const COLUMN: Record<TaskStatus, keyof Board> = {
   pending_approval: 'waiting',
@@ -48,10 +48,11 @@ const COLUMN: Record<TaskStatus, keyof Board> = {
   ready_for_review: 'inReview',
   in_review: 'inReview',
   done: 'done',
-  declined: 'done',
-  cancelled: 'done',
+  declined: 'declined',
+  cancelled: 'cancelled',
 };
-const DONE_LIMIT = 20;
+const CLOSED_LIMIT = 20; // per closed list, so a burst of cancellations can't push finished work off the board
+const CLOSED = ['done', 'declined', 'cancelled'] as const;
 
 export async function boardColumns(db: Db, actor: Actor, projectId: string): Promise<Board> {
   await assertMember(db, actor.userId, projectId);
@@ -63,10 +64,10 @@ export async function boardColumns(db: Db, actor: Actor, projectId: string): Pro
     from tasks t join users r on r.id = t.requester_id join users a on a.id = t.assignee_id
     where t.project_id = ${projectId} and ${where} ${tail}`;
   const open = await taskRows(db`t.status in ${db(OPEN)}`, db``);
-  const closed = await taskRows(db`t.status in ('done', 'declined', 'cancelled')`, db`order by since desc limit ${DONE_LIMIT}`);
+  const closed = (await Promise.all(CLOSED.map(s => taskRows(db`t.status = ${s}`, db`order by since desc limit ${CLOSED_LIMIT}`)))).flat();
   const workRows = await db`${workViewSelect(db)} where w.project_id = ${projectId} and w.status = 'in_progress'`;
-  const finished = await db`${workViewSelect(db)} where w.project_id = ${projectId} and w.status in ('merged', 'abandoned')
-    order by w.last_activity_at desc limit ${DONE_LIMIT}`;
+  const finished = (await Promise.all((['merged', 'abandoned'] as const).map(s => db`${workViewSelect(db)}
+    where w.project_id = ${projectId} and w.status = ${s} order by w.last_activity_at desc limit ${CLOSED_LIMIT}`))).flat();
 
   const taskCard = (r: Record<string, any>): BoardCard => {
     const pr = r.status === 'in_review' ? /\/pull\/(\d+)/.exec(r.evidenceUrl ?? '') : null;
@@ -91,13 +92,15 @@ export async function boardColumns(db: Db, actor: Actor, projectId: string): Pro
     ...workRows.filter(w => !branches.has(`${w.repo}\0${w.key}`)).map(workCard),
     ...finished.map(workCard),
   ];
-  const board: Board = { waiting: [], inProgress: [], needsPerson: [], inReview: [], done: [] };
+  const board: Board = { waiting: [], inProgress: [], needsPerson: [], inReview: [], done: [], declined: [], cancelled: [] };
   for (const c of cards) {
-    const col = c.kind === 'work' ? (c.status === 'in_progress' ? 'inProgress' : 'done') : COLUMN[c.status as TaskStatus];
-    board[col].push({ ...c, old: col !== 'done' && Date.now() - c.since.getTime() > oldMs });
+    const col = c.kind === 'request' ? COLUMN[c.status as TaskStatus]
+      : c.status === 'in_progress' ? 'inProgress' : c.status === 'merged' ? 'done' : 'cancelled';
+    const closedCol = (CLOSED as readonly string[]).includes(col);
+    board[col].push({ ...c, old: !closedCol && Date.now() - c.since.getTime() > oldMs });
   }
   for (const col of ['waiting', 'inProgress', 'needsPerson', 'inReview'] as const) board[col].sort((a, b) => +a.since - +b.since);
-  board.done = board.done.sort((a, b) => +b.since - +a.since).slice(0, DONE_LIMIT);
+  for (const col of CLOSED) board[col] = board[col].sort((a, b) => +b.since - +a.since).slice(0, CLOSED_LIMIT);
   return board;
 }
 
