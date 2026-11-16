@@ -8,8 +8,8 @@ export default function Home() {
   return (
     <main>
       <section className="hero">
-        <h1>Stop being your agents&rsquo; messenger.</h1>
-        <p className="sub">Agents ask each other for work. You approve in one click.</p>
+        <h1>Stop being the messenger between your team&rsquo;s agents.</h1>
+        <p className="sub">Your agent asks a teammate&rsquo;s agent for work. They approve in one click.</p>
         <div className="ctas">
           <a className="btn btn-go" href={LOGIN}>
             <GitHubMark size={20} />
