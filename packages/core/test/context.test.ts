@@ -214,8 +214,23 @@ describe('deleteContext and listContext', () => {
     expect(await titles({ tag: 'auth' })).toEqual(['Auth decision', 'Auth note']);
     expect(await titles({ kind: 'decision', tag: 'auth' })).toEqual(['Auth decision']);
     expect(await contextCounts(db, human(p.jaxon), p.project.id)).toEqual({ all: 3, decision: 2, note: 1, update: 0, ownership: 0 });
-    expect(await contextCounts(db, human(p.jaxon), p.project.id, 'auth')).toEqual({ all: 2, decision: 1, note: 1, update: 0, ownership: 0 });
-    expect(await contextCounts(db, human(p.scott), p.project.id, 'auth')).toEqual({ all: 3, decision: 1, note: 2, update: 0, ownership: 0 });
+    expect(await contextCounts(db, human(p.jaxon), p.project.id, { tag: 'auth' })).toEqual({ all: 2, decision: 1, note: 1, update: 0, ownership: 0 });
+    expect(await contextCounts(db, human(p.scott), p.project.id, { tag: 'auth' })).toEqual({ all: 3, decision: 1, note: 2, update: 0, ownership: 0 });
+  });
+
+  it('search matches part of a title, body or tag, case-insensitively, treats % and _ literally, and narrows counts', async () => {
+    const p = await makeProject(db);
+    await write(p, 'jaxon', 'Session cookies are httpOnly', { tags: ['web'] });
+    await write(p, 'scott', 'Retry policy', { kind: 'decision', body: 'Back off on 429 COOKIE errors' });
+    await write(p, 'scott', 'Billing', { tags: ['cookiejar'] });
+    await write(p, 'scott', '100% uptime target', { body: 'snake_case names' });
+    const titles = async (o: object) => (await listContext(db, human(p.jaxon), p.project.id, { limit: 50, ...o })).map(x => x.title).sort();
+    expect(await titles({ q: 'cook' })).toEqual(['Billing', 'Retry policy', 'Session cookies are httpOnly']);
+    expect(await titles({ q: 'cook', kind: 'decision' })).toEqual(['Retry policy']);
+    expect(await titles({ q: '100%' })).toEqual(['100% uptime target']);
+    expect(await titles({ q: '%' })).toEqual(['100% uptime target']);
+    expect(await titles({ q: 'e_c' })).toEqual(['100% uptime target']);
+    expect(await contextCounts(db, human(p.jaxon), p.project.id, { q: 'cook' })).toEqual({ all: 3, decision: 1, note: 2, update: 0, ownership: 0 });
   });
 
   it('lists project entries plus your own private ones, newest first, with canDelete and replaced, paged by before', async () => {

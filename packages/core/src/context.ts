@@ -109,37 +109,45 @@ export async function findOwner(db: Db, actor: Actor, input: { projectId: string
 }
 
 export type ListedEntry = ContextEntryWithAuthor & { replaced: boolean; canDelete: boolean };
+export type ContextFilter = { tag?: string; q?: string };
 
-// Everything the viewer can see in the project (project entries and their own private ones), newest first, for the dashboard.
+// What the viewer can see (project entries and their own private ones), narrowed by tag and a substring search
+// over title, body and tags. ILIKE, not full-text: a person typing "cook" expects "cookies".
+const visible = (db: Db, actor: Actor, projectId: string, f: ContextFilter) => {
+  const like = f.q ? `%${f.q.replace(/[\\%_]/g, c => '\\' + c)}%` : null;
+  return db`ce.project_id = ${projectId} and (ce.visibility = 'project' or ce.author_id = ${actor.userId})
+    ${f.tag ? db`and ${f.tag} = any(ce.tags)` : db``}
+    ${like ? db`and (ce.title ilike ${like} or ce.body ilike ${like} or array_to_string(ce.tags, ' ') ilike ${like})` : db``}`;
+};
+
+// Newest first, for the dashboard's All entries page.
 export async function listContext(
-  db: Db, actor: Actor, projectId: string, opts: { limit: number; before?: Date; kind?: ContextEntry['kind']; tag?: string },
+  db: Db, actor: Actor, projectId: string, opts: ContextFilter & { limit: number; before?: Date; kind?: ContextEntry['kind'] },
 ): Promise<ListedEntry[]> {
   await assertMember(db, actor.userId, projectId);
   const admin = (await roleOf(db, actor.userId, projectId)) === 'admin';
   const rows = await db`
     select ${entryCols(db)}, not ${notReplaced(db)} as replaced
     from context_entries ce join users u on u.id = ce.author_id
-    where ce.project_id = ${projectId} and (ce.visibility = 'project' or ce.author_id = ${actor.userId})
+    where ${visible(db, actor, projectId, opts)}
       ${opts.before ? db`and ce.created_at < ${opts.before}` : db``}
       ${opts.kind ? db`and ce.kind = ${opts.kind}` : db``}
-      ${opts.tag ? db`and ${opts.tag} = any(ce.tags)` : db``}
     order by ce.created_at desc, ce.id desc
     limit ${opts.limit}`;
   return rows.map(r => ({ ...r, canDelete: admin || r.authorId === actor.userId })) as unknown as ListedEntry[];
 }
 
-// Folder sizes for the dashboard's All entries page, over what the viewer can see, narrowed to a tag when given.
+// Folder sizes over the same filter.
 export async function contextCounts(
-  db: Db, actor: Actor, projectId: string, tag?: string,
+  db: Db, actor: Actor, projectId: string, f: ContextFilter = {},
 ): Promise<{ all: number; decision: number; note: number; update: number; ownership: number }> {
   await assertMember(db, actor.userId, projectId);
   const [r] = await db`
     select count(*)::int as all,
-           count(*) filter (where kind = 'decision')::int as decision, count(*) filter (where kind = 'note')::int as note,
-           count(*) filter (where kind = 'update')::int as update, count(*) filter (where kind = 'ownership')::int as ownership
-    from context_entries
-    where project_id = ${projectId} and (visibility = 'project' or author_id = ${actor.userId})
-      ${tag ? db`and ${tag} = any(tags)` : db``}`;
+           count(*) filter (where ce.kind = 'decision')::int as decision, count(*) filter (where ce.kind = 'note')::int as note,
+           count(*) filter (where ce.kind = 'update')::int as update, count(*) filter (where ce.kind = 'ownership')::int as ownership
+    from context_entries ce
+    where ${visible(db, actor, projectId, f)}`;
   return r as { all: number; decision: number; note: number; update: number; ownership: number };
 }
 
