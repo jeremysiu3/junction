@@ -329,6 +329,8 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 .auth h1 { font-size: var(--text-xl); margin-bottom: var(--space-1); }
 .auth form { display: flex; flex-direction: column; gap: var(--space-3); margin-top: 28px; text-align: left; }
 .auth details { text-align: left; }
+/* Links and notes under a form keep the form's own gap; :where keeps .auth .terms in charge of its spacing */
+.auth :where(form + p, form + details, p + details) { margin-top: var(--space-3); }
 .auth .menu { display: flex; flex-direction: column; gap: 2px; margin: var(--space-4) 0; text-align: left; }
 .auth .menu a { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); border-radius: var(--radius-sm); color: var(--ink-2); }
 .auth .menu a:hover { color: var(--ink); background: var(--hover); text-decoration: none; }
