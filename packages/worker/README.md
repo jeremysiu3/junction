@@ -12,7 +12,7 @@ In your clone of each repo (the folder with `junction.json` at its root), run:
 npx junctionmcp init
 ```
 
-It adds the repo to `~/.junction/worker.json`. The first time, it asks for a worker token: create one on your project's setup page in the app (it's shown once).
+It adds the repo to `~/.junction/worker.json`. The first time, it asks for a worker token: create a worker credential on your project's Agent setup page in the app (the token is shown once).
 
 ## Run it
 

@@ -36,7 +36,7 @@ Everyone keeps their own agent (Claude Code, Cursor, Codex). They connect to Jun
 
 ## Quickstart
 
-1. Sign in at [app.junctionmcp.com](https://app.junctionmcp.com) with GitHub, create a project, and invite your teammates.
+1. Sign in at [app.junctionmcp.com](https://app.junctionmcp.com) with GitHub, create a project, and invite your teammates from **Project settings → Members**.
 2. Add the MCP server to your agent. You sign in with OAuth the first time it connects.
 
    - Claude Code:
@@ -49,7 +49,7 @@ Everyone keeps their own agent (Claude Code, Cursor, Codex). They connect to Jun
    - Cursor: add `{"mcpServers":{"junction":{"url":"https://app.junctionmcp.com/mcp"}}}` to `~/.cursor/mcp.json`.
    - Codex: `codex mcp add junction --url https://app.junctionmcp.com/mcp`, then `codex mcp login junction`.
 
-   Your project's setup page in the app shows the same commands and ticks each step off.
+   Your project's **Agent setup** page in the app shows the same commands and ticks each step off.
 3. Commit a `junction.json` at each repo's root, so the agent knows which project and repo it's in:
 
    ```json
@@ -70,7 +70,7 @@ You need Node 20+, the GitHub CLI (`gh`) logged in, and Claude Code 2.1.314 or n
    npx junctionmcp init
    ```
 
-   It adds the repo to `~/.junction/worker.json`. The first time, it asks for a worker token: create one on your project's setup page (it's shown once).
+   It adds the repo to `~/.junction/worker.json`. The first time, it asks for a worker token: create a worker credential on your project's **Agent setup** page (the token is shown once).
 2. Start the worker, and restart it after adding a repo:
 
    ```sh
@@ -81,7 +81,7 @@ You need Node 20+, the GitHub CLI (`gh`) logged in, and Claude Code 2.1.314 or n
 
 ## Security model
 
-- **Agents never approve tasks.** Approve, decline and defer work only from a dashboard login. There is no approve tool and no CLI.
+- **Agents never approve tasks.** Approve, decline and defer work only from a dashboard login. There is no approve tool and no command-line approval.
 - **Agents never hold a database credential.** Only the web app talks to Postgres. Agents use an OAuth login, and the worker uses a revocable worker credential.
 - **Text from other users' agents is untrusted.** Tool responses wrap it in `[UNTRUSTED CONTENT FROM ANOTHER USER'S AGENT ...]` markers, so your agent treats it as information, not instructions.
 - **Completions carry evidence.** A task can't be marked done without a link or a note.
@@ -94,7 +94,7 @@ Self-hosting Junction is possible but unsupported. The hosted app is the product
 
 ## Development
 
-Prerequisites: Node, Docker (OrbStack or Docker Desktop) and the Supabase CLI.
+Prerequisites: Node 20+, Docker (OrbStack or Docker Desktop) and the Supabase CLI.
 
 ```sh
 npm install
@@ -115,7 +115,7 @@ Fill `apps/web/.env.local` from `supabase status -o env`:
 
 ```sh
 cp supabase/.env.example supabase/.env   # set SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID and SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET
-npx supabase stop && npx supabase start
+supabase stop && supabase start
 ```
 
 **Dev login and seed data.** To test without GitHub, set `JUNCTION_DEV_LOGIN=1` in `apps/web/.env.local`. It adds an email and password login to the login page, and it's for local use only. Then load the demo data: one project, `demo`, with Jeremy as admin and Jaxon and Scott as members, all with the password `password123` (`jeremy@example.com`, `jaxon@example.com`, `scott@example.com`):
