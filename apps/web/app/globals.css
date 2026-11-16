@@ -396,6 +396,13 @@ button.text:hover { color: var(--ink); }
 .kc .m { color: var(--muted); font-size: var(--text-sm); margin-top: 2px; }
 .kc details { margin-top: var(--space-2); font-size: var(--text-sm); }
 .kc details > summary { cursor: pointer; color: var(--muted); }
+.kc details[open] > summary { margin-bottom: var(--space-3); }
+/* collapsible settings sections: the section label is the toggle */
+details.fold > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 6px; margin-bottom: var(--space-2); }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before { content: '▶'; color: var(--muted); font-size: 9px; transition: transform 0.15s; }
+details.fold[open] > summary::before { transform: rotate(90deg); }
+details.fold > summary .lbl { margin: 0; }
 .kc-body { margin-top: var(--space-2); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
 .log { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 12px 10px; }
 .log .day { margin: 12px 0 2px; }
