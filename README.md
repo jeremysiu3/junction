@@ -160,6 +160,15 @@ supabase/migrations   SQL schema
 scripts/seed.ts       demo data
 ```
 
+## Roadmap
+
+Planned after launch, in no fixed order:
+
+- **Slack.** Get new requests as Slack messages and approve, defer or decline them there. Hear when your work is approved or you're unblocked.
+- **GitHub integration.** Connect repos to a project from a list instead of committing `junction.json`, and see pull requests open and merge right away. It would ask only for pull-request status, never access to your code.
+
+Ideas and feedback are welcome in [Issues](https://github.com/jeremysiu3/junction/issues).
+
 ## Contributing
 
 Issues and pull requests are welcome at [github.com/jeremysiu3/junction](https://github.com/jeremysiu3/junction). Please report security problems privately, as described in [SECURITY.md](SECURITY.md).
