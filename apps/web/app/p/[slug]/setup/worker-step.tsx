@@ -16,7 +16,7 @@ export function WorkerCredentialForm({ slug, origin }: { slug: string; origin: s
       {state.error && <p className="error" role="alert">{state.error}</p>}
       {config && (
         <>
-          <p className="muted">Save this as <code>~/.junction/worker.json</code>. The token is shown only now. Then run <code>npx junctionmcp</code>.</p>
+          <p className="muted" style={{ margin: 'var(--space-4) 0 var(--space-2)' }}>Save this as <code>~/.junction/worker.json</code>. The token is shown only now. Then run <code>npx junctionmcp</code>.</p>
           <pre className="snippet">{config}</pre>
         </>
       )}
