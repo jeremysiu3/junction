@@ -1,13 +1,13 @@
 import { Sk, SkPage } from '../skeleton';
 
-// Memory: three key-context blocks beside the activity log.
+// Memory: a row of key-context blocks above the activity log.
 export default function Loading() {
   return (
     <SkPage>
       <div className="page-head"><Sk w="110px" h={22} /></div>
-      <div className="two">
-        <section>
-          <h2 className="lbl"><Sk w="120px" h={12} /></h2>
+      <section className="sec">
+        <h2 className="lbl"><Sk w="120px" h={12} /></h2>
+        <div className="mem-grid">
           {[0, 1, 2].map((i) => (
             <div className="kc" key={i}>
               <div className="t"><Sk w={['78%', '64%', '70%'][i]} h={14} /></div>
@@ -15,8 +15,9 @@ export default function Loading() {
               <div className="m" style={{ marginTop: 8 }}><Sk w="60px" h={12} /></div>
             </div>
           ))}
-        </section>
-        <section>
+        </div>
+      </section>
+      <section>
           <h2 className="lbl"><Sk w="40px" h={12} /></h2>
           <div className="log">
             {[88, 72, 80, 64, 76].map((w, i) => (
@@ -26,8 +27,7 @@ export default function Loading() {
               </div>
             ))}
           </div>
-        </section>
-      </div>
+      </section>
     </SkPage>
   );
 }
