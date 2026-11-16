@@ -2,11 +2,8 @@
 import { useActionState } from 'react';
 import { createWorkerCredentialAction } from './actions';
 
-const repos = { 'your-repo': '/path/to/your/clone' };
-
-export function WorkerCredentialForm({ slug, origin }: { slug: string; origin: string }) {
+export function WorkerCredentialForm() {
   const [state, action, pending] = useActionState(createWorkerCredentialAction, {});
-  const config = state.token && JSON.stringify({ apiUrl: origin, token: state.token, projects: { [slug]: repos } }, null, 2);
   return (
     <>
       <form action={action} className="form">
@@ -14,25 +11,29 @@ export function WorkerCredentialForm({ slug, origin }: { slug: string; origin: s
         <div><button className="primary" disabled={pending}>Create worker credential</button></div>
       </form>
       {state.error && <p className="error" role="alert">{state.error}</p>}
-      {config && (
+      {state.token && (
         <>
-          <p className="muted" style={{ margin: 'var(--space-4) 0 var(--space-2)' }}>Save this as <code>~/.junction/worker.json</code>. The token is shown only now. Then run <code>npx junctionmcp</code>.</p>
-          <pre className="snippet">{config}</pre>
+          <p className="muted" style={{ margin: 'var(--space-4) 0 var(--space-2)' }}>Copy this token for step 2. It&apos;s shown only now.</p>
+          <pre className="snippet">{state.token}</pre>
         </>
       )}
     </>
   );
 }
 
-export function WorkerStep({ slug, origin, seen }: { slug: string; origin: string; seen: boolean }) {
+export function WorkerStep({ seen }: { seen: boolean }) {
   return (
     <>
-      <h2 className="lbl">Step 2 · Start your background worker {seen && <span className="p-ok">✓ A worker has checked in. Make sure this project is in its worker.json.</span>}</h2>
-      <p className="muted">The worker runs approved tasks with your own Claude Code on your machine. One worker per machine serves all your projects.</p>
-      <p className="muted">Add this under <code>projects</code> in your existing <code>~/.junction/worker.json</code>, then restart the worker (it reads the file at startup).</p>
-      <pre className="snippet">{`"${slug}": ${JSON.stringify(repos)}`}</pre>
-      <h4>Only if this machine has no worker yet</h4>
-      <WorkerCredentialForm slug={slug} origin={origin} />
+      <h2 className="lbl">Step 2 · Start your background worker {seen && <span className="p-ok">✓ A worker has checked in</span>}</h2>
+      <p className="muted">The worker runs approved tasks with your own Claude Code on your machine. One worker per machine serves all your projects. It needs Node 20+, the GitHub CLI (<code>gh</code>) logged in, and Claude Code.</p>
+      <h4>1. Create a worker credential <span className="muted">(first time on this machine)</span></h4>
+      <WorkerCredentialForm />
+      <h4>2. In your clone of each repo in this project, run</h4>
+      <pre className="snippet">npx junctionmcp init</pre>
+      <p className="muted">It reads the repo&apos;s <code>junction.json</code> and adds the repo to your worker. The first time, it asks for the token from step 1.</p>
+      <h4>3. Start the worker</h4>
+      <pre className="snippet">npx junctionmcp</pre>
+      <p className="muted">Restart it after adding a repo; it reads its config at startup.</p>
     </>
   );
 }

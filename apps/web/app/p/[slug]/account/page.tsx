@@ -1,7 +1,6 @@
 import { listConnections, listWorkerCredentials, userProfile } from '@junction/core';
 import { db } from '../../../../lib/db';
 import { errorLine, when } from '../../../../lib/format';
-import { origin } from '../../../../lib/origin';
 import { projectFromSlug } from '../../../../lib/project';
 import { signOut } from '../../../login/actions';
 import { revokeConnectionAction, revokeWorkerAction } from '../actions';
@@ -13,7 +12,7 @@ export default async function Account({ params, searchParams }: { params: Promis
   const { slug } = await params;
   const { error } = await searchParams;
   const { actor } = await projectFromSlug(slug);
-  const [me, connections, workers, o] = await Promise.all([userProfile(db, actor.userId), listConnections(db, actor), listWorkerCredentials(db, actor), origin()]);
+  const [me, connections, workers] = await Promise.all([userProfile(db, actor.userId), listConnections(db, actor), listWorkerCredentials(db, actor)]);
   return (
     <>
       <div className="page-head"><h1>Settings</h1></div>
@@ -63,7 +62,7 @@ export default async function Account({ params, searchParams }: { params: Promis
             </div>
           </div>
         ))}
-        <div className="kc"><WorkerCredentialForm slug={slug} origin={o} /></div>
+        <div className="kc"><WorkerCredentialForm /></div>
       </section>
       <section className="sec">
         <h2 className="lbl">Sign out</h2>

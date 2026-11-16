@@ -5,12 +5,22 @@ import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { claudeVersionOk, runClaudeProcess, runsRoot } from './claude.js';
 import { exec } from './exec.js';
+import { runInit } from './init.js';
 import { worktreeIntact } from './worktree.js';
 import { acquireLock, cleanStaleRuns, projectWorktrees, releaseLock, validApiUrl, validProjects } from './startup.js';
 import { clean, tick, type Deps } from './worker.js';
 
 const POLL_MS = 15_000;
 const configPath = process.env.JUNCTION_WORKER_CONFIG || join(homedir(), '.junction', 'worker.json');
+if (process.argv[2] === 'init') {
+  try {
+    await runInit(configPath);
+    process.exit(0);
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : String(e));
+    process.exit(1);
+  }
+}
 let cfg: Record<string, unknown> = {};
 try {
   cfg = JSON.parse(readFileSync(configPath, 'utf8'));
@@ -19,7 +29,7 @@ const { apiUrl, projects } = cfg;
 const workerToken = process.env.JUNCTION_WORKER_TOKEN || cfg.token;
 if (!validApiUrl(apiUrl) || typeof workerToken !== 'string' || !workerToken.startsWith('jw_') || !validProjects(projects)) {
   console.error(
-    `The Junction worker needs ${configPath} with {"apiUrl": "https://...", "token": "jw_...", "projects": {"<project slug>": {"<junction repo>": "<local clone path>"}}}. JUNCTION_WORKER_TOKEN overrides token.`,
+    `No usable worker config at ${configPath}. Run \`npx junctionmcp init\` inside your clone of each repo, then start the worker again.`,
   );
   process.exit(1);
 }

@@ -64,27 +64,20 @@ The worker runs your own Claude Code headless on tasks you've approved, in a git
 
 You need Node 20+, the GitHub CLI (`gh`) logged in, and Claude Code 2.1.314 or newer.
 
-1. On your project's setup page, create a worker credential. The token is shown once.
-2. Save `~/.junction/worker.json`:
+1. In your clone of each repo (the folder with `junction.json` at its root), run:
 
-   ```json
-   {
-     "apiUrl": "https://app.junctionmcp.com",
-     "token": "jw_...",
-     "projects": {
-       "<project slug>": { "<repo>": "<local clone path>" }
-     }
-   }
+   ```sh
+   npx junctionmcp init
    ```
 
-   `projects` maps each project slug, then each Junction repo name, to a local clone. A task for an unmapped repo goes to `stuck`.
-3. Run it:
+   It adds the repo to `~/.junction/worker.json`. The first time, it asks for a worker token: create one on your project's setup page (it's shown once).
+2. Start the worker, and restart it after adding a repo:
 
    ```sh
    npx junctionmcp
    ```
 
-`JUNCTION_WORKER_TOKEN` overrides `token`, and `JUNCTION_WORKER_CONFIG` points at a different config file. The worker reads the file at startup, so restart it after editing. Revoke a credential from your personal Settings in the app. From a clone of this repo, run it with `npm run worker`.
+`JUNCTION_WORKER_TOKEN` overrides the saved token (and `init` then leaves it out of the file), `JUNCTION_WORKER_CONFIG` points at a different config file, and `JUNCTION_API_URL` points `init` at another server, such as `http://127.0.0.1:3000`. Revoke a credential from your personal Settings in the app. From a clone of this repo, run the worker with `npm run worker`, and `init` with `npx tsx <this repo>/packages/worker/src/index.ts init` inside the target clone.
 
 ## Security model
 

@@ -27,7 +27,7 @@ export default async function Setup({ params }: { params: Promise<{ slug: string
         <p className="muted">Save as <code>junction.json</code>. Commit this at the root of each repo for this project.</p>
       </div>
       <div className="card" style={{ marginTop: 'var(--space-4)' }}>
-        <WorkerStep slug={project.slug} origin={o} seen={workerSeen} />
+        <WorkerStep seen={workerSeen} />
       </div>
       <p className="box-link"><a href={`/p/${project.slug}`}>Skip for now</a></p>
     </>

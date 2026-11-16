@@ -64,7 +64,7 @@ export default async function Settings({ params, searchParams }: { params: Promi
           <div className="kc">
             <p className="m">Commit this as <code>junction.json</code> at the root of each repo in this project, with the repo&apos;s name. Agents working in the repo read it to find this project.</p>
             <pre className="snippet">{`{"project":"${project.slug}","repo":"your-repo"}`}</pre>
-            <p className="m">For background work, also map the repo to its local folder in your worker&apos;s <code>~/.junction/worker.json</code>. The <a href={`/p/${slug}/setup`}>agent setup</a> page shows how.</p>
+            <p className="m">For background work, run <code>npx junctionmcp init</code> in your clone too. The <a href={`/p/${slug}/setup`}>agent setup</a> page shows how.</p>
           </div>
         </section>
       </div>
