@@ -1,6 +1,6 @@
 {
   "name": "junctionmcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local worker for Junction: runs your Claude Code headless on tasks you approve.",
   "license": "MIT",
   "type": "module",

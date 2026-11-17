@@ -1,4 +1,5 @@
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { exec } from './exec.js';
@@ -34,6 +35,12 @@ export function mergeConfig(
     token: add.token,
     projects: { ...projects, [add.project]: { ...projects[add.project], [add.repo]: add.path } },
   };
+}
+
+// ~/.junction holds the token, so it's private even when it already existed before init (older setups made it 0755).
+export function privateDir(dir: string): void {
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  chmodSync(dir, 0o700);
 }
 
 function askHidden(question: string): Promise<string> {
@@ -82,7 +89,8 @@ export async function runInit(configPath: string): Promise<void> {
   let typed = false;
   for (;;) {
     if (!validToken(token)) {
-      token = await askHidden('Worker token (create one on Agent setup in the Junction dashboard): ');
+      console.log('Paste your worker token from Agent setup in the Junction dashboard. It stays hidden as you paste; press Enter when done.');
+      token = await askHidden('Worker token: ');
       typed = true;
       if (!validToken(token)) throw new Error("That isn't a worker token. It starts with jw_.");
     }
@@ -96,7 +104,9 @@ export async function runInit(configPath: string): Promise<void> {
     throw new Error(result === 'token' ? "That token isn't valid or was revoked. Create a new one on Agent setup." : `Junction refused project ${project}: ${result}`);
   }
 
-  mkdirSync(dirname(configPath), { recursive: true, mode: 0o700 });
+  // A custom JUNCTION_WORKER_CONFIG folder may be shared, so only the default one is tightened.
+  if (dirname(configPath) === join(homedir(), '.junction')) privateDir(dirname(configPath));
+  else mkdirSync(dirname(configPath), { recursive: true, mode: 0o700 });
   // A token from JUNCTION_WORKER_TOKEN stays out of the file, as the user chose.
   const saved = process.env.JUNCTION_WORKER_TOKEN ? existing.token : token;
   writeFileSync(configPath, JSON.stringify(mergeConfig(existing, { apiUrl, token: saved, project, repo, path: root }), null, 2) + '\n', { mode: 0o600 });

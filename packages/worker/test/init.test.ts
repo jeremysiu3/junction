@@ -1,8 +1,8 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { mergeConfig, readRepoFile, validToken } from '../src/init.js';
+import { mergeConfig, privateDir, readRepoFile, validToken } from '../src/init.js';
 import { validProjects } from '../src/startup.js';
 
 let dir: string;
@@ -48,4 +48,14 @@ describe('mergeConfig', () => {
 it('validToken matches the minted shape only', () => {
   expect(validToken(add.token)).toBe(true);
   for (const bad of ['', 'jw_short', `jw_${'a'.repeat(44)}`, `xx_${'a'.repeat(43)}`, undefined]) expect(validToken(bad)).toBe(false);
+});
+
+it('privateDir creates a missing folder as 0700 and tightens an existing 0755 one', () => {
+  const fresh = join(dir, 'a', '.junction');
+  privateDir(fresh);
+  expect(statSync(fresh).mode & 0o777).toBe(0o700);
+  const old = join(dir, 'old');
+  mkdirSync(old, { mode: 0o755 });
+  privateDir(old);
+  expect(statSync(old).mode & 0o777).toBe(0o700);
 });

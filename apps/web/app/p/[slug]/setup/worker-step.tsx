@@ -30,7 +30,7 @@ export function WorkerStep({ seen }: { seen: boolean }) {
       <WorkerCredentialForm />
       <h4>2. In your clone of each repo in this project, run</h4>
       <pre className="snippet">npx junctionmcp init</pre>
-      <p className="muted">It reads the repo&apos;s <code>junction.json</code> and adds the repo to your worker. The first time, it asks for the token from step 1.</p>
+      <p className="muted">It reads the repo&apos;s <code>junction.json</code> and adds the repo to your worker. The first time, it asks for the token from step 1; it stays hidden as you paste, so press Enter when done.</p>
       <h4>3. Start the worker</h4>
       <pre className="snippet">npx junctionmcp</pre>
       <p className="muted">Restart it after adding a repo; it reads its config at startup.</p>
